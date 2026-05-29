@@ -1,41 +1,29 @@
 <!DOCTYPE html>
 <html lang="ja">
 <head>
-  <link rel="apple-touch-icon" href="ebay_icon.png">
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#ffd1dc">
-  <meta name="apple-mobile-web-app-title" content="ebay管理">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
     <meta charset="UTF-8">
-    <!-- スマホでの意図しないズームや画面の寄りを防ぐ設定 -->
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <link rel="apple-touch-icon" href="ebay_icon.png">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#ffd1dc">
+    <meta name="apple-mobile-web-app-title" content="ebay管理">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <title>eBayリサーチ＆利益計算ツール</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* カスタムスクロールバー */
         ::-webkit-scrollbar { width: 8px; }
         ::-webkit-scrollbar-track { background: #f1f5f9; }
         ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 4px; }
         ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
-        /* ローディングアニメーション */
-        .loader {
-            border: 3px solid #f3f3f3;
-            border-top: 3px solid #3498db;
-            border-radius: 50%;
-            width: 20px;
-            height: 20px;
-            animation: spin 1s linear infinite;
-        }
+        .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        /* スマホ向けのはみ出し防止 */
         body { overscroll-behavior-y: none; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans h-screen flex flex-col overflow-hidden relative">
 
-    <!-- 高額アラートモーダル (最初は非表示) -->
+    <!-- アラートモーダル -->
     <div id="high-price-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 backdrop-blur-sm transition-opacity p-4">
         <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full border-t-4 border-red-500 transform transition-transform scale-100">
             <div class="flex items-center gap-3 mb-4">
@@ -45,7 +33,7 @@
                 <h3 class="text-xl font-bold text-slate-800">高額商品の警告</h3>
             </div>
             <p class="text-sm text-slate-600 mb-6 leading-relaxed">
-                入力された金額が一定の基準（販売$500 または 仕入れ5万円）を超えています。<br>
+                入力された金額が基準（販売$500 または 仕入れ5万円）を超えています。<br>
                 高額な商品はリスクを伴うため、入力ミスがないか再度ご確認ください。
             </p>
             <button onclick="closeModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-lg transition-colors">
@@ -54,7 +42,7 @@
         </div>
     </div>
 
-    <!-- 設定モーダル (最初は非表示) -->
+    <!-- 設定モーダル -->
     <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 backdrop-blur-sm transition-opacity p-4">
         <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-lg w-full border-t-4 border-blue-500 transform transition-transform scale-100">
             <div class="flex justify-between items-center mb-4">
@@ -84,7 +72,6 @@
     <header class="bg-blue-600 text-white p-2 md:p-4 shadow-md shrink-0 z-40 relative">
         <div class="flex justify-between items-center max-w-7xl mx-auto">
             <div class="flex items-center gap-2">
-                <!-- スマホ用メニューボタン (リサーチ画面でのみ表示) -->
                 <button id="mobile-menu-btn" onclick="toggleSidebar()" class="md:hidden p-1 -ml-1 text-white hover:bg-blue-700 rounded transition-colors focus:outline-none">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
@@ -94,7 +81,6 @@
                     <span class="sm:hidden">GPA</span>
                 </h1>
                 
-                <!-- グローバルナビゲーション -->
                 <nav class="hidden md:flex ml-6 bg-blue-700 rounded-lg p-0.5">
                     <button onclick="switchGlobalNav('research')" id="nav-research" class="px-4 py-1.5 text-sm font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all">リサーチ＆計算</button>
                     <button onclick="switchGlobalNav('sales')" id="nav-sales" class="px-4 py-1.5 text-sm font-medium rounded-md text-blue-100 hover:text-white transition-all">販売管理</button>
@@ -120,7 +106,6 @@
             </div>
         </div>
         
-        <!-- スマホ用ボトムナビゲーション (ヘッダー直下に配置) -->
         <nav class="md:hidden mt-2 flex bg-blue-700/50 rounded-lg p-0.5 max-w-sm mx-auto">
              <button onclick="switchGlobalNav('research')" id="mobile-nav-research" class="flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all text-center">リサーチ＆計算</button>
              <button onclick="switchGlobalNav('sales')" id="mobile-nav-sales" class="flex-1 py-1.5 text-xs font-medium rounded-md text-blue-100 hover:text-white transition-all text-center">販売管理</button>
@@ -129,24 +114,13 @@
 
     <!-- メインコンテンツ (リサーチ＆計算画面) -->
     <main id="view-research" class="flex-1 flex overflow-hidden relative max-w-7xl mx-auto w-full">
-        
-        <!-- モバイル用サイドバー背景オーバーレイ -->
         <div id="sidebar-overlay" class="absolute inset-0 bg-slate-900/40 z-20 hidden md:hidden backdrop-blur-sm transition-opacity duration-300" onclick="toggleSidebar()"></div>
 
-        <!-- 左側：eBayリサーチ結果 & 追跡リスト -->
         <section id="sidebar" class="absolute inset-y-0 left-0 w-4/5 sm:w-80 bg-white border-r border-slate-200 flex flex-col h-full z-30 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-1/3 md:max-w-sm md:shadow-none md:z-10">
-            
-            <!-- タブ切り替え -->
             <div class="flex border-b border-slate-200 bg-slate-50 shrink-0">
-                <button id="tab-search" class="flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors" onclick="switchSidebarTab('search')">
-                    🔍 検索
-                </button>
-                <button id="tab-saved" class="flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors border-b-2 border-transparent" onclick="switchSidebarTab('saved')">
-                    📌 追跡 (<span id="saved-count">0</span>)
-                </button>
+                <button id="tab-search" class="flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors" onclick="switchSidebarTab('search')">🔍 検索</button>
+                <button id="tab-saved" class="flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors border-b-2 border-transparent" onclick="switchSidebarTab('saved')">📌 追跡 (<span id="saved-count">0</span>)</button>
             </div>
-
-            <!-- コントロールパネル -->
             <div id="control-panel" class="p-3 border-b border-slate-200 bg-slate-50 shrink-0">
                 <div class="flex gap-2 mb-2">
                     <input type="text" placeholder="Pokemon..." class="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500">
@@ -155,7 +129,7 @@
                 <div class="flex gap-2">
                     <select id="filter-select" class="flex-1 border border-slate-300 rounded px-1 py-1 text-xs focus:outline-none focus:border-blue-500 bg-white" onchange="renderList()">
                         <option value="all">絞込: 全て</option>
-                        <option value="cost-low">仕入 < 1万</option>
+                        <option value="cost-low">仕入 &lt; 1万</option>
                         <option value="profit-plus">黒字のみ</option>
                     </select>
                     <select id="sort-select" class="flex-1 border border-slate-300 rounded px-1 py-1 text-xs focus:outline-none focus:border-blue-500 bg-white" onchange="renderList()">
@@ -165,18 +139,11 @@
                     </select>
                 </div>
             </div>
-            
-            <!-- リスト表示エリア -->
-            <div class="flex-1 overflow-y-auto p-2 space-y-2 bg-slate-50" id="item-list">
-                <!-- JSで動的にレンダリング -->
-            </div>
+            <div class="flex-1 overflow-y-auto p-2 space-y-2 bg-slate-50" id="item-list"></div>
         </section>
 
-        <!-- 右側：詳細分析・仕入れ・利益計算 -->
         <section class="flex-1 overflow-y-auto bg-slate-100 p-3 md:p-6 relative w-full" id="main-content">
             <div id="calculator-panel" class="max-w-5xl mx-auto space-y-4 md:space-y-6 hidden pb-20 md:pb-0">
-                
-                <!-- 選択中商品ヘッダー -->
                 <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-start gap-2 mb-2">
                         <h2 id="selected-title" class="text-base md:text-lg font-bold text-slate-800 leading-tight">商品名</h2>
@@ -195,11 +162,7 @@
                 </div>
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                    
-                    <!-- 左カラム：入力 -->
                     <div class="space-y-4 md:space-y-6">
-                        
-                        <!-- 戦略A & C パネル -->
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                             <h3 class="font-bold text-slate-700 text-sm md:text-base mb-3 flex items-center gap-2">
                                 <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -221,14 +184,13 @@
                             </div>
                         </div>
 
-                        <!-- パラメータ入力 -->
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                             <h3 class="font-bold text-slate-700 text-sm md:text-base mb-3 flex items-center gap-2">
                                 <svg class="w-4 h-4 md:w-5 md:h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
                                 シミュレーション入力
                             </h3>
                             <div class="space-y-3">
-                                <div class="grid grid-cols-2 gap-3">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
                                         <label class="block text-[10px] md:text-xs text-slate-500 mb-1">販売価格(USD)</label>
                                         <input type="number" id="calc-price-usd" value="85.00" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-slate-50" oninput="calculate()">
@@ -237,6 +199,8 @@
                                         <label class="block text-[10px] md:text-xs text-slate-500 mb-1">仕入れ価格(円)</label>
                                         <input type="number" id="calc-cost-jpy" value="5500" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-slate-50" oninput="calculate()">
                                     </div>
+                                </div>
+                                <div class="grid grid-cols-2 gap-3">
                                     <div>
                                         <label class="block text-[10px] md:text-xs text-slate-500 mb-1">重量(g)</label>
                                         <input type="number" id="calc-weight" value="500" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-slate-50" oninput="calculate()">
@@ -246,41 +210,26 @@
                                         <input type="number" id="calc-fee-percent" value="17" step="0.1" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-slate-50" oninput="calculate()">
                                     </div>
                                 </div>
-
                                 <div>
                                     <label class="block text-[10px] md:text-xs text-slate-500 mb-1">配送サービス</label>
                                     <select id="calc-shipping" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white" onchange="calculate()">
-                                        <option value="epacket">日本郵便 (小型包装物) - 軽量・安価</option>
-                                        <option value="ems">日本郵便 (EMS) - 中量・速達</option>
-                                        <option value="fedex">FedEx/DHL - 高速・確実</option>
+                                        <option value="epacket">日本郵便 (小型包装物)</option>
+                                        <option value="ems">日本郵便 (EMS)</option>
+                                        <option value="fedex">FedEx/DHL</option>
                                     </select>
                                 </div>
                             </div>
                         </div>
                     </div>
 
-                    <!-- 右カラム：結果 -->
                     <div class="lg:sticky lg:top-6 lg:self-start">
                         <div class="bg-slate-800 text-white p-4 md:p-5 rounded-xl shadow-lg">
                             <h3 class="text-sm md:text-base font-bold mb-3 text-slate-200 border-b border-slate-600 pb-2">計算結果</h3>
-                            
                             <div class="space-y-2 text-xs md:text-sm">
-                                <div class="flex justify-between">
-                                    <span class="text-slate-400">総売上額</span>
-                                    <span id="res-sales" class="font-bold">¥0</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-400">仕入原価</span>
-                                    <span id="res-cost" class="text-red-300">- ¥0</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-400">手数料</span>
-                                    <span id="res-fee" class="text-red-300">- ¥0</span>
-                                </div>
-                                <div class="flex justify-between">
-                                    <span class="text-slate-400">国際送料</span>
-                                    <span id="res-ship" class="text-red-300">- ¥0</span>
-                                </div>
+                                <div class="flex justify-between"><span class="text-slate-400">総売上額</span><span id="res-sales" class="font-bold">¥0</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">仕入原価</span><span id="res-cost" class="text-red-300">- ¥0</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">手数料</span><span id="res-fee" class="text-red-300">- ¥0</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">国際送料</span><span id="res-ship" class="text-red-300">- ¥0</span></div>
                                 
                                 <div class="bg-slate-900 p-3 rounded-lg mt-3 text-center">
                                     <div class="text-[10px] text-slate-400 mb-1">見込み純利益</div>
@@ -288,7 +237,6 @@
                                     <div class="text-[10px] text-slate-400 mt-1">利益率: <span id="res-margin" class="font-bold text-white">0%</span></div>
                                 </div>
                             </div>
-                            
                             <button id="btn-save" onclick="saveToTracker()" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 md:py-3 rounded-lg text-sm font-bold transition-colors shadow-md">
                                 スプレッドシートに記録
                             </button>
@@ -306,9 +254,8 @@
         </section>
     </main>
 
-    <!-- メインコンテンツ (販売管理画面) - 初期は非表示 -->
+    <!-- メインコンテンツ (販売管理画面) -->
     <main id="view-sales" class="flex-1 overflow-y-auto bg-slate-100 p-3 md:p-6 relative max-w-7xl mx-auto w-full hidden">
-        
         <div class="flex justify-between items-end mb-4 md:mb-6">
             <div>
                 <h2 class="text-lg md:text-2xl font-bold text-slate-800 flex items-center gap-2">
@@ -324,7 +271,6 @@
             </button>
         </div>
 
-        <!-- 統計サマリー (モック) -->
         <div class="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 mb-6">
             <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                 <div class="text-[10px] md:text-xs text-slate-500 mb-1">今月の確定利益</div>
@@ -344,7 +290,6 @@
             </div>
         </div>
 
-        <!-- 販売リスト (モック) -->
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden">
             <div class="overflow-x-auto">
                 <table class="w-full text-left text-sm whitespace-nowrap">
@@ -360,105 +305,60 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-slate-100">
-                        <!-- アイテム 0 (出品中 - Active) 新規追加 -->
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-4 py-3">
-                                <span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-1 rounded border border-blue-200">出品中</span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="font-medium text-slate-800 truncate max-w-[150px] md:max-w-xs" title="Seiko Vintage Watch Automatic Men's">Seiko Vintage Watch Automatic...</div>
-                                <div class="text-[10px] text-slate-500">Item ID: 123456789012</div>
-                            </td>
+                            <td class="px-4 py-3"><span class="bg-blue-100 text-blue-800 text-[10px] font-bold px-2 py-1 rounded border border-blue-200">出品中</span></td>
+                            <td class="px-4 py-3"><div class="font-medium text-slate-800 truncate max-w-[150px] md:max-w-xs">Seiko Vintage Watch Automatic...</div><div class="text-[10px] text-slate-500">Item ID: 123456789012</div></td>
                             <td class="px-4 py-3 text-slate-600 text-xs">2026/05/29</td>
                             <td class="px-4 py-3 text-right text-slate-500 text-xs">設定: $650.00</td>
                             <td class="px-4 py-3 text-right text-slate-400 text-xs">-</td>
                             <td class="px-4 py-3 text-right text-slate-400 text-xs">-</td>
                             <td class="px-4 py-3 flex justify-center gap-2">
-                                <button onclick="window.open('https://www.ebay.com/itm/123456789012', '_blank')" class="text-slate-600 hover:text-blue-600 text-xs font-medium border border-slate-300 hover:border-blue-400 hover:bg-blue-50 px-2 py-1 rounded transition-colors flex items-center gap-1">
-                                    <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                                    eBayで開く
-                                </button>
+                                <button onclick="window.open('https://www.ebay.com/itm/123456789012', '_blank')" class="text-slate-600 hover:text-blue-600 text-xs font-medium border border-slate-300 hover:border-blue-400 hover:bg-blue-50 px-2 py-1 rounded transition-colors flex items-center gap-1"><svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>eBayで開く</button>
                             </td>
                         </tr>
-
-                        <!-- アイテム 1 (未発送) -->
                         <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-4 py-3">
-                                <span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-1 rounded">発送待ち</span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="font-medium text-slate-800 truncate max-w-[150px] md:max-w-xs" title="Pokemon Card Game XYZ Booster Box Japan">Pokemon Card Game XYZ...</div>
-                                <div class="text-[10px] text-slate-500">Order: #10023 | Item ID: 987654321098</div>
-                            </td>
+                            <td class="px-4 py-3"><span class="bg-amber-100 text-amber-800 text-[10px] font-bold px-2 py-1 rounded">発送待ち</span></td>
+                            <td class="px-4 py-3"><div class="font-medium text-slate-800 truncate max-w-[150px] md:max-w-xs">Pokemon Card Game XYZ...</div><div class="text-[10px] text-slate-500">Order: #10023</div></td>
                             <td class="px-4 py-3 text-slate-600 text-xs">2026/05/28</td>
                             <td class="px-4 py-3 text-right font-medium">12,750</td>
                             <td class="px-4 py-3 text-right text-red-500 text-xs">未確定</td>
                             <td class="px-4 py-3 text-right text-slate-400 text-xs">-</td>
                             <td class="px-4 py-3 flex justify-center gap-2">
                                 <button onclick="openEditSalesModal('item1')" class="text-blue-600 hover:text-blue-800 text-xs font-medium border border-blue-200 hover:bg-blue-50 px-2 py-1 rounded transition-colors">利益確定へ</button>
-                                <button onclick="window.open('https://www.ebay.com/itm/987654321098', '_blank')" class="text-slate-400 hover:text-slate-600 p-1" title="eBayで開く">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
-                                </button>
-                            </td>
-                        </tr>
-                        <!-- アイテム 2 (完了) -->
-                        <tr class="hover:bg-slate-50 transition-colors">
-                            <td class="px-4 py-3">
-                                <span class="bg-emerald-100 text-emerald-800 text-[10px] font-bold px-2 py-1 rounded">取引完了</span>
-                            </td>
-                            <td class="px-4 py-3">
-                                <div class="font-medium text-slate-800 truncate max-w-[150px] md:max-w-xs" title="Anime Figure ABC 1/7 Scale Japan">Anime Figure ABC 1/7...</div>
-                                <div class="text-[10px] text-slate-500">Order: #10022</div>
-                            </td>
-                            <td class="px-4 py-3 text-slate-600 text-xs">2026/05/25</td>
-                            <td class="px-4 py-3 text-right font-medium">6,375</td>
-                            <td class="px-4 py-3 text-right text-red-500 text-xs">-4,100</td>
-                            <td class="px-4 py-3 text-right font-bold text-emerald-600">2,275</td>
-                            <td class="px-4 py-3 text-center">
-                                <button class="text-slate-500 hover:text-slate-700 text-xs px-2 py-1">詳細</button>
                             </td>
                         </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-        <!-- 今後の拡張: ページネーション等のスペース -->
         <div class="h-20"></div>
     </main>
 
-    <!-- 利益確定入力モーダル (販売管理画面用) -->
+    <!-- 利益確定入力モーダル -->
     <div id="sales-edit-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-end md:items-center justify-center z-50 backdrop-blur-sm transition-opacity">
         <div class="bg-white rounded-t-2xl md:rounded-2xl shadow-2xl w-full max-w-lg md:mx-4 transform transition-transform translate-y-full md:translate-y-0" id="sales-modal-content">
             <div class="p-4 md:p-6 border-b border-slate-200 flex justify-between items-center">
                 <h3 class="font-bold text-slate-800">実費用の入力（利益確定）</h3>
-                <button onclick="closeEditSalesModal()" class="text-slate-400 hover:text-slate-600">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
-                </button>
+                <button onclick="closeEditSalesModal()" class="text-slate-400 hover:text-slate-600"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg></button>
             </div>
             <div class="p-4 md:p-6 space-y-4">
                 <div class="bg-slate-50 p-3 rounded border border-slate-200">
                     <div class="text-[10px] text-slate-500">対象商品</div>
                     <div class="text-sm font-medium">Pokemon Card Game XYZ Booster Box...</div>
-                    <div class="mt-2 flex justify-between text-sm">
-                        <span>実売上(eBay着金):</span>
-                        <span class="font-bold">¥12,750</span>
-                    </div>
+                    <div class="mt-2 flex justify-between text-sm"><span>実売上(eBay着金):</span><span class="font-bold">¥12,750</span></div>
                 </div>
-                
                 <div class="grid grid-cols-2 gap-4">
                     <div>
                         <label class="block text-xs text-slate-600 mb-1">実際の仕入額 (円)</label>
-                        <input type="number" placeholder="例: 5200" class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                        <input type="number" class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
                     </div>
                     <div>
                         <label class="block text-xs text-slate-600 mb-1">実際の国際送料 (円)</label>
-                        <input type="number" placeholder="例: 1350" class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
+                        <input type="number" class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500">
                     </div>
                 </div>
-                
                 <div class="border-t border-slate-200 pt-4 flex justify-between items-center">
-                    <span class="text-sm text-slate-600">確定純利益:</span>
-                    <span class="text-2xl font-bold text-emerald-500">¥--</span>
+                    <span class="text-sm text-slate-600">確定純利益:</span><span class="text-2xl font-bold text-emerald-500">¥--</span>
                 </div>
             </div>
             <div class="p-4 border-t border-slate-200 flex justify-end gap-3 bg-slate-50 rounded-b-2xl">
@@ -470,104 +370,57 @@
 
     <script>
         // ==========================================
-        // グローバルナビゲーション (画面切り替え)
+        // UI & ナビゲーション
         // ==========================================
         function switchGlobalNav(viewId) {
-            const viewResearch = document.getElementById('view-research');
-            const viewSales = document.getElementById('view-sales');
+            document.getElementById('view-research').classList.toggle('hidden', viewId !== 'research');
+            document.getElementById('view-sales').classList.toggle('hidden', viewId !== 'sales');
+            document.getElementById('mobile-menu-btn').classList.toggle('hidden', viewId !== 'research');
             
-            // PC用Nav
-            const navResearch = document.getElementById('nav-research');
-            const navSales = document.getElementById('nav-sales');
-            // スマホ用Nav
-            const mobileNavResearch = document.getElementById('mobile-nav-research');
-            const mobileNavSales = document.getElementById('mobile-nav-sales');
+            const nR = document.getElementById('nav-research'), nS = document.getElementById('nav-sales');
+            const mnR = document.getElementById('mobile-nav-research'), mnS = document.getElementById('mobile-nav-sales');
             
-            // メニューボタン(スマホ)はリサーチ画面でのみ表示
-            const mobileMenuBtn = document.getElementById('mobile-menu-btn');
-
-            if (viewId === 'research') {
-                viewResearch.classList.remove('hidden');
-                viewSales.classList.add('hidden');
-                
-                navResearch.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all";
-                navSales.className = "px-4 py-1.5 text-sm font-medium rounded-md text-blue-100 hover:text-white transition-all";
-                mobileNavResearch.className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all text-center";
-                mobileNavSales.className = "flex-1 py-1.5 text-xs font-medium rounded-md text-blue-100 hover:text-white transition-all text-center";
-                mobileMenuBtn.classList.remove('hidden');
+            if(viewId === 'research') {
+                nR.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all";
+                nS.className = "px-4 py-1.5 text-sm font-medium rounded-md text-blue-100 hover:text-white transition-all";
+                mnR.className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all text-center";
+                mnS.className = "flex-1 py-1.5 text-xs font-medium rounded-md text-blue-100 hover:text-white transition-all text-center";
             } else {
-                viewResearch.classList.add('hidden');
-                viewSales.classList.remove('hidden');
-                
-                navSales.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all";
-                navResearch.className = "px-4 py-1.5 text-sm font-medium rounded-md text-blue-100 hover:text-white transition-all";
-                mobileNavSales.className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all text-center";
-                mobileNavResearch.className = "flex-1 py-1.5 text-xs font-medium rounded-md text-blue-100 hover:text-white transition-all text-center";
-                mobileMenuBtn.classList.add('hidden');
+                nS.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all";
+                nR.className = "px-4 py-1.5 text-sm font-medium rounded-md text-blue-100 hover:text-white transition-all";
+                mnS.className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all text-center";
+                mnR.className = "flex-1 py-1.5 text-xs font-medium rounded-md text-blue-100 hover:text-white transition-all text-center";
             }
         }
 
-        // ==========================================
-        // 販売管理モーダル
-        // ==========================================
         function openEditSalesModal() {
-            const modal = document.getElementById('sales-edit-modal');
-            const content = document.getElementById('sales-modal-content');
-            modal.classList.remove('hidden');
-            // スマホ用のスライドアニメーション
-            setTimeout(() => {
-                content.classList.remove('translate-y-full');
-            }, 10);
+            const m = document.getElementById('sales-edit-modal'), c = document.getElementById('sales-modal-content');
+            m.classList.remove('hidden'); setTimeout(() => c.classList.remove('translate-y-full'), 10);
         }
-
         function closeEditSalesModal() {
-            const modal = document.getElementById('sales-edit-modal');
-            const content = document.getElementById('sales-modal-content');
-            content.classList.add('translate-y-full');
-            setTimeout(() => {
-                modal.classList.add('hidden');
-            }, 300); // transition時間に合わせる
+            const m = document.getElementById('sales-edit-modal'), c = document.getElementById('sales-modal-content');
+            c.classList.add('translate-y-full'); setTimeout(() => m.classList.add('hidden'), 300);
         }
 
-
-        // ==========================================
-        // 既存ロジック (リサーチ機能など)
-        // ==========================================
         function toggleSidebar() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebar-overlay');
-            if (sidebar.classList.contains('-translate-x-full')) {
-                sidebar.classList.remove('-translate-x-full');
-                overlay.classList.remove('hidden');
-            } else {
-                sidebar.classList.add('-translate-x-full');
-                overlay.classList.add('hidden');
-            }
+            const sidebar = document.getElementById('sidebar'), overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full'); overlay.classList.toggle('hidden');
         }
 
+        function openSettingsModal() { document.getElementById('settings-gas-url').value = GAS_API_URL; document.getElementById('settings-modal').classList.remove('hidden'); }
+        function closeSettingsModal() { document.getElementById('settings-modal').classList.add('hidden'); }
+        function showModal() { document.getElementById('high-price-modal').classList.remove('hidden'); }
+        function closeModal() { document.getElementById('high-price-modal').classList.add('hidden'); }
+
+        // ==========================================
+        // データ管理 & GAS通信
+        // ==========================================
         let GAS_API_URL = localStorage.getItem('gasApiUrl') || "";
-
-        function openSettingsModal() {
-            document.getElementById('settings-gas-url').value = GAS_API_URL;
-            document.getElementById('settings-modal').classList.remove('hidden');
-        }
-
-        function closeSettingsModal() {
-            document.getElementById('settings-modal').classList.add('hidden');
-        }
-
-        function saveSettings() {
-            const url = document.getElementById('settings-gas-url').value.trim();
-            GAS_API_URL = url;
-            localStorage.setItem('gasApiUrl', url);
-            closeSettingsModal();
-            fetchLatestRate();
-        }
-
         let currentSidebarTab = 'search'; 
         let currentItem = null;
         let alertedHighPrice = false; 
-
+        let savedItems = [];
+        
         const searchItems = [
             { id: "item_001", title: "Pokemon Card Game XYZ Booster Box Japan Brand New", priceUsd: 85.00, soldCount: 30, estCost: 5500, weight: 300, thumb: "TCG" },
             { id: "item_002", title: "Anime Figure ABC 1/7 Scale Japan Authentic Used", priceUsd: 42.50, soldCount: 15, estCost: 2000, weight: 500, thumb: "Fig" },
@@ -575,53 +428,42 @@
             { id: "item_004", title: "Japanese Traditional Matcha Tea Set", priceUsd: 60.00, soldCount: 45, estCost: 3500, weight: 800, thumb: "Tea" }
         ];
 
-        let savedItems = [];
+        window.addEventListener('DOMContentLoaded', () => { fetchLatestRate(); renderList(); });
+        document.getElementById('global-rate').addEventListener('input', () => { renderList(); if (currentItem) calculate(); });
 
-        document.getElementById('global-rate').addEventListener('input', () => {
-            renderList();
-            if (currentItem) calculate();
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            fetchLatestRate();
-            renderList();
-        });
-        
-        async function fetchLatestRate() {
-            if(!GAS_API_URL) return;
-            const loader = document.getElementById('rate-loader');
-            const status = document.getElementById('rate-status');
-            loader.classList.remove('hidden');
-            status.textContent = "取得中";
-
-            try {
-                const response = await fetch(`${GAS_API_URL}?action=getRate`);
-                if (!response.ok) throw new Error('Network error');
-                const data = await response.json();
-                if (data.success && data.rate) {
-                    document.getElementById('global-rate').value = Math.floor(data.rate);
-                    status.textContent = "完了";
-                    setTimeout(() => status.textContent = "", 2000);
-                    renderList();
-                    if(currentItem) calculate();
-                }
-            } catch (error) {
-                console.error("Rate error:", error);
-                status.textContent = "失敗";
-            } finally {
-                loader.classList.add('hidden');
-            }
+        function saveSettings() {
+            GAS_API_URL = document.getElementById('settings-gas-url').value.trim();
+            localStorage.setItem('gasApiUrl', GAS_API_URL);
+            closeSettingsModal(); fetchLatestRate();
         }
 
+        async function fetchLatestRate() {
+            if(!GAS_API_URL) return;
+            const loader = document.getElementById('rate-loader'), status = document.getElementById('rate-status');
+            loader.classList.remove('hidden'); status.textContent = "取得中";
+            try {
+                const res = await fetch(`${GAS_API_URL}?action=getRate`);
+                if (!res.ok) throw new Error('Network error');
+                const data = await res.json();
+                if (data.success && data.rate) {
+                    document.getElementById('global-rate').value = Math.floor(data.rate);
+                    status.textContent = "完了"; setTimeout(() => status.textContent = "", 2000);
+                    renderList(); if(currentItem) calculate();
+                }
+            } catch (e) { status.textContent = "失敗"; } finally { loader.classList.add('hidden'); }
+        }
+
+        // ★★★修正箇所: targetを指定してJSONを送信★★★
         async function saveToTracker() {
-            if (!currentItem || !GAS_API_URL) return;
+            if (!currentItem || !GAS_API_URL) {
+                alert("エラー: GASのURLが設定されていません。右上の設定(歯車)から入力してください。");
+                return;
+            }
             const btn = document.getElementById('btn-save');
             const originalText = btn.innerHTML;
-            btn.disabled = true;
-            btn.innerHTML = '保存中...';
-            btn.classList.replace('bg-emerald-600', 'bg-slate-600');
+            btn.disabled = true; btn.innerHTML = '保存中...'; btn.classList.replace('bg-emerald-600', 'bg-slate-600');
 
-            const payload = {
+            const payloadData = {
                 id: currentItem.id,
                 title: currentItem.title,
                 priceUsd: parseFloat(document.getElementById('calc-price-usd').value),
@@ -630,53 +472,62 @@
                 updatedAt: new Date().toLocaleString('ja-JP')
             };
 
+            // GAS側に「追跡リストへ保存して」と伝えるための入れ物
+            const postData = {
+                target: "tracker", // GAS側でこれを見て振り分ける
+                payload: payloadData
+            };
+
             try {
                 const response = await fetch(GAS_API_URL, {
                     method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' },
-                    body: JSON.stringify(payload)
+                    headers: { 'Content-Type': 'text/plain' }, // CORS回避のため text/plain
+                    body: JSON.stringify(postData)
                 });
+                
                 const data = await response.json();
+                
                 if (data.success) {
-                    const existingIndex = savedItems.findIndex(i => i.id === payload.id);
-                    if (existingIndex >= 0) savedItems[existingIndex] = payload;
-                    else savedItems.push(payload);
+                    const existingIndex = savedItems.findIndex(i => i.id === payloadData.id);
+                    if (existingIndex >= 0) savedItems[existingIndex] = payloadData;
+                    else savedItems.push(payloadData);
+                    
                     document.getElementById('saved-count').textContent = savedItems.length;
                     checkSavedStatus();
                     if(currentSidebarTab === 'search') renderList();
+                    
                     btn.innerHTML = '✓ 保存完了';
                     btn.classList.replace('bg-slate-600', 'bg-emerald-500');
+                } else {
+                    throw new Error(data.error || '不明なエラー');
                 }
             } catch (error) {
+                console.error("保存エラー:", error);
+                alert("保存に失敗しました。GASのURLやスプレッドシートのシート名を確認してください。\nエラー詳細: " + error.message);
                 btn.innerHTML = '保存失敗';
                 btn.classList.replace('bg-slate-600', 'bg-red-500');
             } finally {
                 setTimeout(() => {
-                    btn.disabled = false;
-                    btn.innerHTML = originalText;
+                    btn.disabled = false; btn.innerHTML = originalText;
                     btn.classList.remove('bg-emerald-500', 'bg-red-500', 'bg-slate-600');
                     btn.classList.add('bg-emerald-600');
                 }, 2000);
             }
         }
 
+        // ==========================================
+        // リスト表示 & 計算ロジック
+        // ==========================================
         function switchSidebarTab(tabName) {
             currentSidebarTab = tabName;
-            const tabSearch = document.getElementById('tab-search');
-            const tabSaved = document.getElementById('tab-saved');
-            const controlPanel = document.getElementById('control-panel');
-
+            const tabSearch = document.getElementById('tab-search'), tabSaved = document.getElementById('tab-saved'), controlPanel = document.getElementById('control-panel');
             if (tabName === 'search') {
-                tabSearch.classList.replace('text-slate-500', 'text-blue-600');
-                tabSearch.classList.replace('border-transparent', 'border-blue-600');
-                tabSaved.classList.replace('text-blue-600', 'text-slate-500');
-                tabSaved.classList.replace('border-blue-600', 'border-transparent');
+                tabSearch.className = "flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors";
+                tabSaved.className = "flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors border-b-2 border-transparent";
                 controlPanel.classList.remove('hidden');
             } else {
-                tabSaved.classList.replace('text-slate-500', 'text-blue-600');
-                tabSaved.classList.replace('border-transparent', 'border-blue-600');
-                tabSearch.classList.replace('text-blue-600', 'text-slate-500');
-                tabSearch.classList.replace('border-blue-600', 'border-transparent');
+                tabSaved.className = "flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors";
+                tabSearch.className = "flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors border-b-2 border-transparent";
                 controlPanel.classList.add('hidden');
             }
             renderList();
@@ -693,9 +544,7 @@
         }
 
         function renderList() {
-            const listEl = document.getElementById('item-list');
-            const sortType = document.getElementById('sort-select').value;
-            const filterType = document.getElementById('filter-select').value;
+            const listEl = document.getElementById('item-list'), sortType = document.getElementById('sort-select').value, filterType = document.getElementById('filter-select').value;
             let targetData = currentSidebarTab === 'search' ? [...searchItems] : [...savedItems];
 
             let processedItems = targetData.map(item => {
@@ -710,15 +559,10 @@
                 if (sortType === 'sold-desc') processedItems.sort((a, b) => b.soldCount - a.soldCount);
                 else if (sortType === 'profit-desc') processedItems.sort((a, b) => b.calcProfit - a.calcProfit);
                 else if (sortType === 'margin-desc') processedItems.sort((a, b) => b.calcMargin - a.calcMargin);
-            } else {
-                 processedItems.reverse();
-            }
+            } else { processedItems.reverse(); }
 
             listEl.innerHTML = ''; 
-            if (processedItems.length === 0) {
-                listEl.innerHTML = `<div class="text-center text-slate-500 py-6 text-xs">データなし</div>`;
-                return;
-            }
+            if (processedItems.length === 0) { listEl.innerHTML = `<div class="text-center text-slate-500 py-6 text-xs">データなし</div>`; return; }
 
             processedItems.forEach(item => {
                 const profitColor = item.calcProfit >= 0 ? 'text-emerald-600' : 'text-red-500';
@@ -726,12 +570,10 @@
                 const itemJson = encodeURIComponent(JSON.stringify(item));
                 
                 const html = `
-                <div class="border ${isSaved && currentSidebarTab === 'search' ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 bg-white'} rounded-lg p-2.5 hover:shadow-md cursor-pointer transition-all" 
-                     onclick="selectItem('${itemJson}')">
+                <div class="border ${isSaved && currentSidebarTab === 'search' ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 bg-white'} rounded-lg p-2.5 hover:shadow-md cursor-pointer transition-all" onclick="selectItem('${itemJson}')">
                     <div class="flex gap-2">
                         <div class="w-10 h-10 md:w-12 md:h-12 bg-slate-100 rounded border border-slate-200 flex-shrink-0 flex items-center justify-center text-slate-400 text-[9px] font-bold relative">
-                            ${item.thumb}
-                            ${isSaved && currentSidebarTab === 'search' ? '<span class="absolute -top-1.5 -right-1.5 text-xs">📌</span>' : ''}
+                            ${item.thumb} ${isSaved && currentSidebarTab === 'search' ? '<span class="absolute -top-1.5 -right-1.5 text-xs">📌</span>' : ''}
                         </div>
                         <div class="flex-1 min-w-0">
                             <h3 class="font-medium text-xs text-slate-800 truncate">${item.title}</h3>
@@ -747,28 +589,16 @@
         }
 
         function selectItem(encodedItemJson) {
-            const item = JSON.parse(decodeURIComponent(encodedItemJson));
-            currentItem = item;
-            
-            document.getElementById('empty-state').classList.add('hidden');
-            document.getElementById('calculator-panel').classList.remove('hidden');
-            
+            const item = JSON.parse(decodeURIComponent(encodedItemJson)); currentItem = item;
+            document.getElementById('empty-state').classList.add('hidden'); document.getElementById('calculator-panel').classList.remove('hidden');
             document.getElementById('selected-title').textContent = item.title;
             document.getElementById('selected-price').textContent = "$" + item.priceUsd.toFixed(2);
             document.getElementById('selected-sold').textContent = (item.soldCount || '-') + "個";
-            
             document.getElementById('calc-price-usd').value = item.priceUsd;
             document.getElementById('calc-cost-jpy').value = item.estCost;
             document.getElementById('calc-weight').value = item.weight;
-            
-            alertedHighPrice = false; 
-            checkSavedStatus();
-            calculate();
-
-            if (window.innerWidth < 768) {
-                const sidebar = document.getElementById('sidebar');
-                if (!sidebar.classList.contains('-translate-x-full')) toggleSidebar();
-            }
+            alertedHighPrice = false; checkSavedStatus(); calculate();
+            if (window.innerWidth < 768) { const sidebar = document.getElementById('sidebar'); if (!sidebar.classList.contains('-translate-x-full')) toggleSidebar(); }
             document.getElementById('main-content').scrollTop = 0;
         }
 
@@ -779,42 +609,23 @@
             window.open(url, '_blank');
         }
 
-        function showModal() { document.getElementById('high-price-modal').classList.remove('hidden'); }
-        function closeModal() { document.getElementById('high-price-modal').classList.add('hidden'); }
-
         function calculate() {
-            const rate = parseFloat(document.getElementById('global-rate').value) || 150;
-            const priceUsd = parseFloat(document.getElementById('calc-price-usd').value) || 0;
-            const costJpy = parseFloat(document.getElementById('calc-cost-jpy').value) || 0;
-            const weight = parseFloat(document.getElementById('calc-weight').value) || 0;
-            const packCost = parseFloat(document.getElementById('calc-pack').value) || 0;
-            const shippingType = document.getElementById('calc-shipping').value;
-            const feePercent = parseFloat(document.getElementById('calc-fee-percent').value) || 17;
+            const rate = parseFloat(document.getElementById('global-rate').value) || 150, priceUsd = parseFloat(document.getElementById('calc-price-usd').value) || 0;
+            const costJpy = parseFloat(document.getElementById('calc-cost-jpy').value) || 0, weight = parseFloat(document.getElementById('calc-weight').value) || 0;
+            const packCost = parseFloat(document.getElementById('calc-pack').value) || 0, shippingType = document.getElementById('calc-shipping').value, feePercent = parseFloat(document.getElementById('calc-fee-percent').value) || 17;
 
-            if (!alertedHighPrice && (priceUsd >= 500 || costJpy >= 50000)) {
-                showModal();
-                alertedHighPrice = true;
-            }
+            if (!alertedHighPrice && (priceUsd >= 500 || costJpy >= 50000)) { showModal(); alertedHighPrice = true; }
 
-            const salesJpy = Math.floor(priceUsd * rate);
-            const feeJpy = Math.floor(salesJpy * (feePercent / 100));
-            let shippingJpy = (shippingType === 'epacket') ? 900 + Math.floor(weight / 100) * 150 :
-                              (shippingType === 'ems') ? 2000 + Math.floor(weight / 100) * 200 :
-                              2300 + Math.floor(weight / 100) * 100;
-
-            const totalCost = costJpy + feeJpy + shippingJpy + packCost;
-            const profit = salesJpy - totalCost;
+            const salesJpy = Math.floor(priceUsd * rate), feeJpy = Math.floor(salesJpy * (feePercent / 100));
+            let shippingJpy = (shippingType === 'epacket') ? 900 + Math.floor(weight / 100) * 150 : (shippingType === 'ems') ? 2000 + Math.floor(weight / 100) * 200 : 2300 + Math.floor(weight / 100) * 100;
+            const totalCost = costJpy + feeJpy + shippingJpy + packCost, profit = salesJpy - totalCost;
 
             const format = (num) => "¥" + num.toLocaleString('ja-JP');
-            document.getElementById('res-sales').textContent = format(salesJpy);
-            document.getElementById('res-cost').textContent = "- " + format(costJpy);
-            document.getElementById('res-fee-rate').textContent = feePercent;
-            document.getElementById('res-fee').textContent = "- " + format(feeJpy);
-            document.getElementById('res-ship').textContent = "- " + format(shippingJpy);
-            document.getElementById('res-pack').textContent = "- " + format(packCost);
+            document.getElementById('res-sales').textContent = format(salesJpy); document.getElementById('res-cost').textContent = "- " + format(costJpy);
+            document.getElementById('res-fee-rate').textContent = feePercent; document.getElementById('res-fee').textContent = "- " + format(feeJpy);
+            document.getElementById('res-ship').textContent = "- " + format(shippingJpy); document.getElementById('res-pack').textContent = "- " + format(packCost);
             
-            const profitEl = document.getElementById('res-profit');
-            profitEl.textContent = format(profit);
+            const profitEl = document.getElementById('res-profit'); profitEl.textContent = format(profit);
             profitEl.className = `text-2xl md:text-3xl font-black ${profit < 0 ? 'text-red-500' : 'text-emerald-400'}`;
             document.getElementById('res-margin').textContent = (salesJpy > 0 ? (profit / salesJpy) * 100 : 0).toFixed(1) + "%";
         }
@@ -822,8 +633,7 @@
         function checkSavedStatus() {
             if (!currentItem) return;
             const badge = document.getElementById('saved-badge');
-            if (savedItems.some(i => i.id === currentItem.id)) badge.classList.remove('hidden');
-            else badge.classList.add('hidden');
+            if (savedItems.some(i => i.id === currentItem.id)) badge.classList.remove('hidden'); else badge.classList.add('hidden');
         }
     </script>
 </body>
