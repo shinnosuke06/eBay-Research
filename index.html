@@ -126,6 +126,28 @@
                     <input type="text" id="search-input" placeholder="Pokemon..." class="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500" onkeypress="if(event.key === 'Enter') executeSearch()">
                     <button id="btn-search" onclick="executeSearch()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors">検索</button>
                 </div>
+                <!-- ★追加: 検索条件フィルタ -->
+                <div class="grid grid-cols-2 gap-2 mb-2 bg-white p-2 rounded border border-slate-200 shadow-sm">
+                    <div>
+                        <label class="block text-[10px] text-slate-500 mb-0.5">商品状態</label>
+                        <select id="search-status" class="w-full border border-slate-300 rounded px-1 py-1 text-xs focus:outline-none focus:border-blue-500">
+                            <option value="sold">売却済 (Sold)</option>
+                            <option value="active">出品中 (Active)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] text-slate-500 mb-0.5">発送元</label>
+                        <select id="search-location" class="w-full border border-slate-300 rounded px-1 py-1 text-xs focus:outline-none focus:border-blue-500">
+                            <option value="jp">日本 (Japan) のみ</option>
+                            <option value="all">すべて</option>
+                        </select>
+                    </div>
+                    <div class="col-span-2 flex items-center gap-2 mt-1">
+                        <label class="text-[10px] text-slate-500 whitespace-nowrap">最低価格(円)</label>
+                        <input type="number" id="search-min-price" placeholder="例: 10000" class="flex-1 border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500">
+                    </div>
+                </div>
+                <!-- 既存の並替フィルタ -->
                 <div class="flex gap-2">
                     <select id="filter-select" class="flex-1 border border-slate-300 rounded px-1 py-1 text-xs focus:outline-none focus:border-blue-500 bg-white" onchange="renderList()">
                         <option value="all">絞込: 全て</option>
@@ -427,12 +449,23 @@
             const keyword = document.getElementById('search-input').value.trim();
             if(!keyword || !GAS_API_URL) return;
             
+            // ★追加: 検索条件の取得とドル換算
+            const status = document.getElementById('search-status').value;
+            const location = document.getElementById('search-location').value;
+            const minPriceJpy = parseFloat(document.getElementById('search-min-price').value) || 0;
+            const rate = parseFloat(document.getElementById('global-rate').value) || 150;
+            
+            // 日本円をUSDに換算してGASへ送る（eBayの検索はUSD基準のため）
+            const minPriceUsd = minPriceJpy > 0 ? (minPriceJpy / rate).toFixed(2) : 0;
+            
             const btn = document.getElementById('btn-search');
             btn.innerHTML = "検索中..."; btn.disabled = true;
             document.getElementById('item-list').innerHTML = `<div class="text-center py-6 loader mx-auto mt-4 border-blue-500"></div><p class="text-center text-xs text-slate-400 mt-2">eBayからデータを取得中...</p>`;
             
             try {
-                const res = await fetch(`${GAS_API_URL}?action=search&keyword=${encodeURIComponent(keyword)}`);
+                // ★変更: パラメータを追加して送信
+                const query = `action=search&keyword=${encodeURIComponent(keyword)}&status=${status}&location=${location}&minPriceUsd=${minPriceUsd}`;
+                const res = await fetch(`${GAS_API_URL}?${query}`);
                 const data = await res.json();
                 if(data.success) {
                     searchItems = data.data.map(item => ({
