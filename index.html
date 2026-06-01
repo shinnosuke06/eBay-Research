@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <link rel="apple-touch-icon" href="./ebay_icon.png">
-    <link rel="manifest" href="./manifest.json">
+    <link rel="apple-touch-icon" href="ebay_icon.png">
+    <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#ffd1dc">
     <meta name="apple-mobile-web-app-title" content="ebay管理">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -23,73 +23,152 @@
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans h-screen flex flex-col overflow-hidden relative">
 
-    <!-- モーダル類（省略せずにそのまま保持してください） -->
-    <div id="high-price-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4"><div class="bg-white p-6 rounded-2xl w-full max-w-sm"><h3 class="font-bold">警告</h3><button onclick="closeModal()">OK</button></div></div>
-    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 p-4"><div class="bg-white p-6 rounded-2xl w-full max-w-lg"><h3 class="font-bold mb-4">設定</h3><input type="url" id="settings-gas-url" class="w-full border p-2 mb-4"><div class="flex justify-end gap-2"><button onclick="closeSettingsModal()">キャンセル</button><button onclick="saveSettings()" class="bg-blue-600 text-white px-4 py-2 rounded">保存</button></div></div></div>
+    <!-- アラートモーダル -->
+    <div id="high-price-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 backdrop-blur-sm transition-opacity p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-sm w-full border-t-4 border-red-500 transform transition-transform scale-100">
+            <div class="flex items-center gap-3 mb-4">
+                <div class="bg-red-100 p-2 rounded-full text-red-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                </div>
+                <h3 class="text-xl font-bold text-slate-800">高額商品の警告</h3>
+            </div>
+            <p class="text-sm text-slate-600 mb-6 leading-relaxed">
+                入力された金額が基準（販売$500 または 仕入れ5万円）を超えています。<br>
+                高額な商品はリスクを伴うため、入力ミスがないか再度ご確認ください。
+            </p>
+            <button onclick="closeModal()" class="w-full bg-slate-800 hover:bg-slate-700 text-white font-bold py-3 rounded-lg transition-colors">
+                確認して続ける
+            </button>
+        </div>
+    </div>
+
+    <!-- 設定モーダル -->
+    <div id="settings-modal" class="fixed inset-0 bg-black bg-opacity-60 hidden flex items-center justify-center z-50 backdrop-blur-sm transition-opacity p-4">
+        <div class="bg-white p-6 rounded-2xl shadow-2xl max-w-lg w-full border-t-4 border-blue-500 transform transition-transform scale-100">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-xl font-bold text-slate-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                    システム設定
+                </h3>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600 transition-colors">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path></svg>
+                </button>
+            </div>
+            <div class="space-y-4 mb-6">
+                <div>
+                    <label class="block text-sm font-semibold text-slate-700 mb-1">GAS ウェブアプリ URL</label>
+                    <input type="url" id="settings-gas-url" placeholder="https://script.google.com/macros/s/..." class="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500 focus:ring-1 focus:ring-blue-500">
+                    <p class="text-[11px] text-slate-500 mt-1">※Google Apps Scriptでデプロイして発行されたURLを入力してください。</p>
+                </div>
+            </div>
+            <div class="flex justify-end gap-3">
+                <button onclick="closeSettingsModal()" class="px-4 py-2 border border-slate-300 rounded text-sm font-medium text-slate-700 hover:bg-slate-50 transition-colors">キャンセル</button>
+                <button onclick="saveSettings()" class="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded text-sm font-medium transition-colors">保存</button>
+            </div>
+        </div>
+    </div>
 
     <!-- ヘッダー -->
     <header class="bg-blue-600 text-white p-2 md:p-4 shadow-md shrink-0 z-40 relative">
         <div class="flex justify-between items-center max-w-7xl mx-auto">
             <div class="flex items-center gap-2">
-                <button onclick="toggleSidebar()" class="md:hidden p-1 -ml-1"><svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg></button>
-                <h1 class="text-base md:text-xl font-bold">GPA Tool</h1>
-            </div>
-            <div class="flex items-center gap-2 text-xs md:text-sm">
-                <div class="flex items-center gap-1 bg-blue-700/50 p-1 rounded-lg">
-                    <span class="text-blue-100">為替:</span>
-                    <input type="number" id="global-rate" value="150" class="w-12 px-1 py-0.5 text-black rounded text-right text-sm"> 
-                    <span class="text-blue-100">円/$</span>
-                </div>
-                <button onclick="openSettingsModal()" class="p-1"><svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg></button>
-            </div>
-        </div>
-    </header>
-
-    <main class="flex-1 flex overflow-hidden relative max-w-7xl mx-auto w-full">
-        <!-- 左サイドバー (検索・リスト) -->
-        <section id="sidebar" class="absolute inset-y-0 left-0 w-4/5 bg-white border-r border-slate-200 flex flex-col h-full z-30 transform -translate-x-full md:relative md:translate-x-0 md:w-1/3 md:max-w-sm transition-transform duration-300">
-            <div class="flex border-b bg-slate-50 shrink-0">
-                <button id="tab-search" class="flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600" onclick="switchSidebarTab('search')">🔍 検索</button>
-                <button id="tab-saved" class="flex-1 py-3 text-sm font-bold text-slate-500" onclick="switchSidebarTab('saved')">📌 追跡 (<span id="saved-count">0</span>)</button>
+                <button id="mobile-menu-btn" onclick="toggleSidebar()" class="md:hidden p-1 -ml-1 text-white hover:bg-blue-700 rounded transition-colors focus:outline-none">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+                </button>
+                <h1 class="text-base md:text-xl font-bold flex items-center gap-1 md:gap-2">
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                    <span class="hidden sm:inline">Global Profit Analyzer</span>
+                    <span class="sm:hidden">GPA</span>
+                </h1>
+                
+                <nav class="hidden md:flex ml-6 bg-blue-700 rounded-lg p-0.5">
+                    <button onclick="switchGlobalNav('research')" id="nav-research" class="px-4 py-1.5 text-sm font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all">リサーチ＆計算</button>
+                    <button onclick="switchGlobalNav('sales')" id="nav-sales" class="px-4 py-1.5 text-sm font-medium rounded-md text-blue-100 hover:text-white transition-all">販売管理</button>
+                </nav>
             </div>
             
-            <div id="control-panel" class="p-3 border-b bg-slate-50 shrink-0">
-                <div class="flex gap-2 mb-2">
-                    <input type="text" id="search-input" placeholder="キーワード (例: Pokemon)" class="flex-1 border rounded px-2 py-1.5 text-sm" onkeypress="if(event.key === 'Enter') executeSearch()">
-                    <button id="btn-search" onclick="executeSearch()" class="bg-blue-600 text-white px-3 py-1.5 rounded text-sm font-medium">検索</button>
+            <div class="flex items-center gap-2 text-xs md:text-sm">
+                <div class="flex items-center gap-1 md:gap-2 bg-blue-700/50 p-1 md:p-1.5 rounded-lg">
+                    <span id="rate-loader" class="loader hidden w-3 h-3 md:w-4 md:h-4"></span>
+                    <span id="rate-status" class="text-[10px] md:text-xs text-blue-200 hidden sm:inline"></span>
+                    
+                    <span class="hidden lg:inline text-blue-100">為替:</span>
+                    <input type="number" id="global-rate" value="150" class="w-12 md:w-16 px-1 py-0.5 text-black rounded text-right focus:outline-none text-sm"> 
+                    <span class="text-[10px] md:text-xs text-blue-100">円/$</span>
+                    
+                    <button onclick="fetchLatestRate()" class="ml-1 text-blue-200 hover:text-white transition-colors" title="最新レートを取得">
+                        <svg class="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                    </button>
                 </div>
-                <!-- ★追加: 検索条件フィルタ -->
+                <button onclick="openSettingsModal()" class="p-1 text-blue-200 hover:text-white transition-colors" title="設定">
+                    <svg class="w-5 h-5 md:w-6 md:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
+                </button>
+            </div>
+        </div>
+        
+        <nav class="md:hidden mt-2 flex bg-blue-700/50 rounded-lg p-0.5 max-w-sm mx-auto">
+             <button onclick="switchGlobalNav('research')" id="mobile-nav-research" class="flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all text-center">リサーチ＆計算</button>
+             <button onclick="switchGlobalNav('sales')" id="mobile-nav-sales" class="flex-1 py-1.5 text-xs font-medium rounded-md text-blue-100 hover:text-white transition-all text-center">販売管理</button>
+        </nav>
+    </header>
+
+    <!-- メインコンテンツ (リサーチ＆計算画面) -->
+    <main id="view-research" class="flex-1 flex overflow-hidden relative max-w-7xl mx-auto w-full">
+        <div id="sidebar-overlay" class="absolute inset-0 bg-slate-900/40 z-20 hidden md:hidden backdrop-blur-sm transition-opacity duration-300" onclick="toggleSidebar()"></div>
+
+        <!-- 左サイドバー -->
+        <section id="sidebar" class="absolute inset-y-0 left-0 w-4/5 sm:w-80 bg-white border-r border-slate-200 flex flex-col h-full z-30 shadow-2xl transform -translate-x-full transition-transform duration-300 ease-in-out md:relative md:translate-x-0 md:w-1/3 md:max-w-sm md:shadow-none md:z-10">
+            <div class="flex border-b border-slate-200 bg-slate-50 shrink-0">
+                <button id="tab-search" class="flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors" onclick="switchSidebarTab('search')">🔍 検索</button>
+                <button id="tab-saved" class="flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors border-b-2 border-transparent" onclick="switchSidebarTab('saved')">📌 追跡 (<span id="saved-count">0</span>)</button>
+            </div>
+            <div id="control-panel" class="p-3 border-b border-slate-200 bg-slate-50 shrink-0">
+                <div class="flex gap-2 mb-2">
+                    <input type="text" id="search-input" placeholder="キーワード (例: Pokemon)" class="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500" onkeypress="if(event.key === 'Enter') executeSearch()">
+                    <button id="btn-search" onclick="executeSearch()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors">検索</button>
+                </div>
+                <!-- 検索条件フィルタ -->
                 <div class="grid grid-cols-2 gap-2 mb-2 bg-white p-2 rounded border border-slate-200 shadow-sm">
                     <div>
                         <label class="block text-[10px] text-slate-500 mb-0.5">商品状態</label>
-                        <select id="search-status" class="w-full border rounded px-1 py-1 text-xs">
+                        <select id="search-status" class="w-full border border-slate-300 rounded px-1 py-1 text-xs focus:outline-none focus:border-blue-500">
                             <option value="sold">売却済 (Sold)</option>
                             <option value="active">出品中 (Active)</option>
                         </select>
                     </div>
                     <div>
                         <label class="block text-[10px] text-slate-500 mb-0.5">発送元</label>
-                        <select id="search-location" class="w-full border rounded px-1 py-1 text-xs">
+                        <select id="search-location" class="w-full border border-slate-300 rounded px-1 py-1 text-xs focus:outline-none focus:border-blue-500">
                             <option value="jp">日本 (Japan) のみ</option>
                             <option value="all">すべて</option>
                         </select>
                     </div>
                     <div class="col-span-2 flex items-center gap-2 mt-1">
                         <label class="text-[10px] text-slate-500 whitespace-nowrap">最低価格(円)</label>
-                        <input type="number" id="search-min-price" placeholder="例: 10000" class="flex-1 border rounded px-2 py-1 text-xs">
+                        <input type="number" id="search-min-price" placeholder="例: 10000" class="flex-1 border border-slate-300 rounded px-2 py-1 text-xs focus:outline-none focus:border-blue-500">
                     </div>
+                </div>
+                <div class="flex gap-2">
+                    <select id="filter-select" class="flex-1 border border-slate-300 rounded px-1 py-1 text-xs focus:outline-none focus:border-blue-500 bg-white" onchange="renderList()">
+                        <option value="all">絞込: 全て</option>
+                        <option value="profit-plus">黒字のみ(追跡リスト)</option>
+                    </select>
+                    <select id="sort-select" class="flex-1 border border-slate-300 rounded px-1 py-1 text-xs focus:outline-none focus:border-blue-500 bg-white" onchange="renderList()">
+                        <option value="price-desc">価格: 高い順</option>
+                        <option value="price-asc">価格: 安い順</option>
+                    </select>
                 </div>
             </div>
             <div class="flex-1 overflow-y-auto p-2 space-y-2 bg-slate-50" id="item-list"></div>
         </section>
 
-        <!-- 右メインコンテンツ (計算画面) -->
-        <section class="flex-1 overflow-y-auto bg-slate-100 p-3 md:p-6 w-full" id="main-content">
-            <div id="calculator-panel" class="max-w-5xl mx-auto space-y-4 hidden pb-20 md:pb-0">
-                <div class="bg-white p-4 rounded-xl shadow-sm border">
+        <!-- 中央計算エリア -->
+        <section class="flex-1 overflow-y-auto bg-slate-100 p-3 md:p-6 relative w-full" id="main-content">
+            <div id="calculator-panel" class="max-w-5xl mx-auto space-y-4 md:space-y-6 hidden pb-20 md:pb-0">
+                <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                     <div class="flex justify-between items-start gap-2 mb-2">
                         <h2 id="selected-title" class="text-base md:text-lg font-bold text-slate-800 leading-tight">商品名</h2>
-                        <a id="selected-link" href="#" target="_blank" class="shrink-0 bg-blue-100 text-blue-700 text-[10px] font-bold px-2 py-1 rounded border border-blue-200">eBayで見る</a>
+                        <a id="selected-link" href="#" target="_blank" class="shrink-0 bg-blue-100 hover:bg-blue-200 text-blue-700 text-[10px] md:text-xs font-bold px-2 py-1 rounded-full border border-blue-200 transition-colors">eBayで開く</a>
                     </div>
                     <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm">
                         <div>
@@ -98,55 +177,60 @@
                         </div>
                         <div>
                             <span class="text-slate-500 text-xs">過去90日の総販売数:</span>
-                            <!-- ★ここに総販売数が表示されます -->
                             <span id="selected-sold" class="font-bold text-red-600 text-base">0件</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                    <div class="space-y-4">
-                        <div class="bg-white p-4 rounded-xl shadow-sm border">
-                            <h3 class="font-bold text-slate-700 text-sm mb-3">国内仕入れリサーチ</h3>
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
+                    <div class="space-y-4 md:space-y-6">
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-bold text-slate-700 text-sm md:text-base mb-3 flex items-center gap-2">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
+                                国内仕入れリサーチ
+                            </h3>
                             <div class="grid grid-cols-1 gap-2 mb-3">
                                 <div class="p-2 bg-emerald-50 rounded border border-emerald-100 text-center">
                                     <div class="text-[10px] text-emerald-800 mb-0.5">目標仕入れ上限額（損益分岐点）</div>
-                                    <div class="text-base font-bold text-emerald-700" id="break-even-point">¥0 以下</div>
+                                    <div class="text-sm md:text-base font-bold text-emerald-700" id="break-even-point">¥0 以下</div>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
-                                <button onclick="openSearch('amazon')" class="w-full bg-slate-800 text-white text-xs py-2 rounded">Amazon検索</button>
-                                <button onclick="openSearch('mercari')" class="w-full bg-red-500 text-white text-xs py-2 rounded">メルカリ検索</button>
+                                <button onclick="openSearch('amazon')" class="w-full bg-slate-800 hover:bg-slate-700 text-white text-xs py-2 rounded-lg transition-colors">Amazon検索</button>
+                                <button onclick="openSearch('mercari')" class="w-full bg-red-500 hover:bg-red-600 text-white text-xs py-2 rounded-lg transition-colors">メルカリ検索</button>
                             </div>
                         </div>
 
-                        <div class="bg-white p-4 rounded-xl shadow-sm border">
-                            <h3 class="font-bold text-slate-700 text-sm mb-3">シミュレーション入力</h3>
+                        <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
+                            <h3 class="font-bold text-slate-700 text-sm md:text-base mb-3 flex items-center gap-2">
+                                <svg class="w-4 h-4 md:w-5 md:h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
+                                シミュレーション入力
+                            </h3>
                             <div class="space-y-3">
-                                <div class="grid grid-cols-2 gap-3">
+                                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label class="block text-xs text-slate-500 mb-1">販売価格(USD)</label>
-                                        <input type="number" id="calc-price-usd" class="w-full border rounded px-2 py-1.5 text-sm" oninput="calculate()">
+                                        <label class="block text-[10px] md:text-xs text-slate-500 mb-1">販売価格(USD)</label>
+                                        <input type="number" id="calc-price-usd" value="0" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-slate-50" oninput="calculate()">
                                     </div>
                                     <div>
-                                        <label class="block text-xs text-slate-500 mb-1">実仕入価格(円)</label>
-                                        <input type="number" id="calc-cost-jpy" value="0" class="w-full border rounded px-2 py-1.5 text-sm" oninput="calculate()">
+                                        <label class="block text-[10px] md:text-xs text-slate-500 mb-1">実仕入価格(円)</label>
+                                        <input type="number" id="calc-cost-jpy" value="" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-1 focus:ring-blue-500" oninput="calculate()">
                                     </div>
                                 </div>
                                 <div class="grid grid-cols-2 gap-3">
                                     <div>
-                                        <label class="block text-xs text-slate-500 mb-1">重量(g)</label>
-                                        <input type="number" id="calc-weight" value="500" class="w-full border rounded px-2 py-1.5 text-sm" oninput="calculate()">
+                                        <label class="block text-[10px] md:text-xs text-slate-500 mb-1">重量(g)</label>
+                                        <input type="number" id="calc-weight" value="500" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white" oninput="calculate()">
                                     </div>
                                     <div>
-                                        <label class="block text-xs text-slate-500 mb-1">手数料率(%)</label>
-                                        <input type="number" id="calc-fee-percent" value="17" class="w-full border rounded px-2 py-1.5 text-sm" oninput="calculate()">
+                                        <label class="block text-[10px] md:text-xs text-slate-500 mb-1">手数料率(%)</label>
+                                        <input type="number" id="calc-fee-percent" value="17" step="0.1" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white" oninput="calculate()">
                                     </div>
                                 </div>
                                 <div>
-                                    <label class="block text-xs text-slate-500 mb-1">配送サービス</label>
-                                    <select id="calc-shipping" class="w-full border rounded px-2 py-1.5 text-sm" onchange="calculate()">
-                                        <option value="epacket">日本郵便 (小型包装物/eパケ相当)</option>
+                                    <label class="block text-[10px] md:text-xs text-slate-500 mb-1">配送サービス</label>
+                                    <select id="calc-shipping" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white" onchange="calculate()">
+                                        <option value="epacket">日本郵便 (小型包装物)</option>
                                         <option value="ems">日本郵便 (EMS)</option>
                                         <option value="fedex">FedEx/DHL</option>
                                     </select>
@@ -155,46 +239,105 @@
                         </div>
                     </div>
 
-                    <!-- 計算結果パネル -->
-                    <div class="bg-slate-800 text-white p-4 rounded-xl shadow-lg h-fit lg:sticky lg:top-4">
-                        <h3 class="text-sm font-bold mb-3 border-b border-slate-600 pb-2">計算結果</h3>
-                        <div class="space-y-2 text-sm">
-                            <div class="flex justify-between"><span class="text-slate-400">総売上額</span><span id="res-sales">¥0</span></div>
-                            <div class="flex justify-between"><span class="text-slate-400">仕入原価</span><span id="res-cost" class="text-red-300">- ¥0</span></div>
-                            <div class="flex justify-between"><span class="text-slate-400">手数料</span><span id="res-fee" class="text-red-300">- ¥0</span></div>
-                            <div class="flex justify-between"><span class="text-slate-400">国際送料</span><span id="res-ship" class="text-red-300">- ¥0</span></div>
-                            
-                            <div class="bg-slate-900 p-3 rounded-lg mt-3 text-center">
-                                <div class="text-xs text-slate-400 mb-1">見込み純利益</div>
-                                <div id="res-profit" class="text-3xl font-black text-emerald-400">¥0</div>
-                                <div class="text-xs text-slate-400 mt-1">利益率: <span id="res-margin" class="text-white">0%</span></div>
+                    <div class="lg:sticky lg:top-6 lg:self-start">
+                        <div class="bg-slate-800 text-white p-4 md:p-5 rounded-xl shadow-lg">
+                            <h3 class="text-sm md:text-base font-bold mb-3 text-slate-200 border-b border-slate-600 pb-2">計算結果</h3>
+                            <div class="space-y-2 text-xs md:text-sm">
+                                <div class="flex justify-between"><span class="text-slate-400">総売上額</span><span id="res-sales" class="font-bold">¥0</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">仕入原価</span><span id="res-cost" class="text-red-300">- ¥0</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">手数料</span><span id="res-fee" class="text-red-300">- ¥0</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">国際送料</span><span id="res-ship" class="text-red-300">- ¥0</span></div>
+                                
+                                <div class="bg-slate-900 p-3 rounded-lg mt-3 text-center">
+                                    <div class="text-[10px] text-slate-400 mb-1">見込み純利益</div>
+                                    <div id="res-profit" class="text-2xl md:text-3xl font-black text-emerald-400">¥0</div>
+                                    <div class="text-[10px] text-slate-400 mt-1">利益率: <span id="res-margin" class="font-bold text-white">0%</span></div>
+                                </div>
                             </div>
+                            <button id="btn-save" onclick="saveToTracker()" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 md:py-3 rounded-lg text-sm font-bold transition-colors shadow-md">
+                                スプレッドシートに記録
+                            </button>
                         </div>
-                        <button id="btn-save" onclick="saveToTracker()" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 rounded-lg font-bold shadow-md">
-                            スプレッドシートに記録
-                        </button>
                     </div>
                 </div>
             </div>
             
             <div id="empty-state" class="h-full flex flex-col items-center justify-center text-slate-400 p-6 text-center">
-                <p>左側のメニューからキーワード検索を行ってください</p>
+                <svg class="w-12 h-12 mb-3 text-slate-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0zM10 7v3m0 0v3m0-3h3m-3 0H7"></path></svg>
+                <p class="hidden md:block text-sm">左側のメニューからキーワード検索を行ってください</p>
+                <p class="md:hidden mb-3 text-xs">左上の ☰ メニューから検索を開く</p>
+                <button class="md:hidden bg-blue-600 text-white px-4 py-1.5 rounded-lg text-xs" onclick="toggleSidebar()">リストを開く</button>
             </div>
         </section>
     </main>
 
+    <!-- メインコンテンツ (販売管理画面) -->
+    <main id="view-sales" class="flex-1 overflow-y-auto bg-slate-100 p-3 md:p-6 relative max-w-7xl mx-auto w-full hidden">
+        <div class="flex justify-between items-end mb-4 md:mb-6">
+            <div>
+                <h2 class="text-lg md:text-2xl font-bold text-slate-800 flex items-center gap-2">
+                    <svg class="w-5 h-5 md:w-6 md:h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"></path></svg>
+                    販売管理ダッシュボード
+                </h2>
+                <p class="text-xs md:text-sm text-slate-500 mt-1">実際に売れた商品の利益を確定し、管理します。</p>
+            </div>
+            <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium flex items-center gap-1 transition-colors">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                <span class="hidden sm:inline">最新データを取得</span>
+                <span class="sm:hidden">更新</span>
+            </button>
+        </div>
+
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center text-slate-500">
+            <p>※ここは後ほど実装予定のダッシュボードエリアです。</p>
+        </div>
+        <div class="h-20"></div>
+    </main>
+
     <script>
+        // ==========================================
+        // 全体変数
+        // ==========================================
         let GAS_API_URL = localStorage.getItem('gasApiUrl') || "";
         let currentSidebarTab = 'search'; 
         let currentItem = null;
+        let alertedHighPrice = false; 
         let searchItems = [];
         let savedItems = [];
 
-        // ★追加・修正: 検索実行関数
+        window.addEventListener('DOMContentLoaded', () => { 
+            fetchLatestRate(); 
+            // 初期状態では空にする
+            renderList(); 
+        });
+        document.getElementById('global-rate').addEventListener('input', () => { 
+            renderList(); 
+            if (currentItem) calculate(); 
+        });
+
+        // ==========================================
+        // API通信関数
+        // ==========================================
+        async function fetchLatestRate() {
+            if(!GAS_API_URL) return;
+            const loader = document.getElementById('rate-loader'), status = document.getElementById('rate-status');
+            loader.classList.remove('hidden'); status.textContent = "取得中";
+            try {
+                const res = await fetch(`${GAS_API_URL}?action=getRate`);
+                if (!res.ok) throw new Error('Network error');
+                const data = await res.json();
+                if (data.success && data.rate) {
+                    document.getElementById('global-rate').value = Math.floor(data.rate);
+                    status.textContent = "完了"; setTimeout(() => status.textContent = "", 2000);
+                    renderList(); if(currentItem) calculate();
+                }
+            } catch (e) { status.textContent = "失敗"; } finally { loader.classList.add('hidden'); }
+        }
+
         async function executeSearch() {
             const keyword = document.getElementById('search-input').value.trim();
             if(!keyword) { alert("キーワードを入力してください。"); return; }
-            if(!GAS_API_URL) { alert("右上の設定(歯車)からGASのURLを登録してください。"); return; }
+            if(!GAS_API_URL) { alert("右上の設定(歯車)からGASのURLを登録してください。"); openSettingsModal(); return; }
             
             const status = document.getElementById('search-status').value;
             const location = document.getElementById('search-location').value;
@@ -204,7 +347,7 @@
             
             const btn = document.getElementById('btn-search');
             btn.innerHTML = "検索中..."; btn.disabled = true;
-            document.getElementById('item-list').innerHTML = `<div class="text-center py-6 text-xs text-slate-400">eBayからデータを取得中...<br>数秒お待ち下さい</div>`;
+            document.getElementById('item-list').innerHTML = `<div class="text-center py-6 loader mx-auto mt-4 border-blue-500"></div><p class="text-center text-xs text-slate-400 mt-2">eBayからデータを取得中...<br>数秒お待ち下さい</p>`;
             
             try {
                 const query = `action=search&keyword=${encodeURIComponent(keyword)}&status=${status}&location=${location}&minPriceUsd=${minPriceUsd}`;
@@ -212,42 +355,138 @@
                 const data = await res.json();
                 
                 if(data.success) {
-                    const totalSold = data.data.totalEntries || 0; // ★過去90日の総ヒット数を取得
+                    const totalSold = data.data.totalEntries || 0;
                     searchItems = data.data.items.map(item => ({
                         ...item,
                         estCost: 0,
                         weight: 500,
-                        soldCount: totalSold // ★アイテムデータに持たせる
+                        soldCount: totalSold
                     }));
                     if(currentSidebarTab !== 'search') switchSidebarTab('search');
                     renderList();
                 } else {
                     alert("検索エラー: " + data.error);
+                    document.getElementById('item-list').innerHTML = '';
                 }
             } catch(e) {
-                alert("通信エラーが発生しました");
+                alert("通信エラーが発生しました。設定からGASのURLを確認してください。");
+                document.getElementById('item-list').innerHTML = '';
             } finally {
                 btn.innerHTML = "検索"; btn.disabled = false;
             }
         }
 
-        // リスト描画と計算処理
+        async function saveToTracker() {
+            if (!currentItem || !GAS_API_URL) {
+                alert("エラー: GASのURLが設定されていません。");
+                return;
+            }
+            const btn = document.getElementById('btn-save');
+            const originalText = btn.innerHTML;
+            btn.disabled = true; btn.innerHTML = '保存中...'; btn.classList.replace('bg-emerald-600', 'bg-slate-600');
+
+            const payloadData = {
+                id: currentItem.id,
+                title: currentItem.title,
+                priceUsd: parseFloat(document.getElementById('calc-price-usd').value),
+                estCost: parseFloat(document.getElementById('calc-cost-jpy').value) || 0,
+                weight: parseFloat(document.getElementById('calc-weight').value),
+                updatedAt: new Date().toLocaleString('ja-JP')
+            };
+
+            try {
+                const response = await fetch(GAS_API_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'text/plain' }, 
+                    body: JSON.stringify({ target: "tracker", payload: payloadData })
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    const existingIndex = savedItems.findIndex(i => i.id === payloadData.id);
+                    if (existingIndex >= 0) savedItems[existingIndex] = payloadData;
+                    else savedItems.push(payloadData);
+                    
+                    document.getElementById('saved-count').textContent = savedItems.length;
+                    
+                    btn.innerHTML = '✓ 保存完了';
+                    btn.classList.replace('bg-slate-600', 'bg-emerald-500');
+                } else {
+                    throw new Error(data.error);
+                }
+            } catch (error) {
+                alert("保存に失敗しました。");
+                btn.innerHTML = '保存失敗';
+                btn.classList.replace('bg-slate-600', 'bg-red-500');
+            } finally {
+                setTimeout(() => {
+                    btn.disabled = false; btn.innerHTML = originalText;
+                    btn.classList.remove('bg-emerald-500', 'bg-red-500', 'bg-slate-600');
+                    btn.classList.add('bg-emerald-600');
+                }, 2000);
+            }
+        }
+
+        // ==========================================
+        // UI & 計算ロジック
+        // ==========================================
+        function calculateItemProfit(item) {
+            const rate = parseFloat(document.getElementById('global-rate').value) || 150;
+            const salesJpy = Math.floor(item.priceUsd * rate);
+            const feeJpy = Math.floor(salesJpy * 0.17); 
+            let shippingJpy = (item.weight <= 300) ? 1350 : (item.weight <= 500) ? 1650 : 2800; 
+            const totalCost = (item.estCost || 0) + feeJpy + shippingJpy + 100; 
+            const profit = salesJpy - totalCost;
+            return { profit, margin: salesJpy > 0 ? (profit / salesJpy) * 100 : 0 };
+        }
+
         function renderList() {
             const listEl = document.getElementById('item-list');
-            listEl.innerHTML = '';
-            if (searchItems.length === 0) { listEl.innerHTML = `<div class="text-center text-slate-500 py-6 text-xs">データがありません</div>`; return; }
+            const sortType = document.getElementById('sort-select').value;
+            const filterType = document.getElementById('filter-select').value;
+            let targetData = currentSidebarTab === 'search' ? [...searchItems] : [...savedItems];
 
-            searchItems.forEach(item => {
+            let processedItems = targetData.map(item => {
+                const calc = calculateItemProfit(item);
+                return { ...item, calcProfit: calc.profit, calcMargin: calc.margin };
+            });
+
+            if (currentSidebarTab === 'search') {
+                if (filterType === 'profit-plus') processedItems = processedItems.filter(item => item.calcProfit > 0);
+                
+                if (sortType === 'price-desc') processedItems.sort((a, b) => b.priceUsd - a.priceUsd);
+                else if (sortType === 'price-asc') processedItems.sort((a, b) => a.priceUsd - b.priceUsd);
+            } else { 
+                processedItems.reverse(); 
+            }
+
+            listEl.innerHTML = ''; 
+            if (processedItems.length === 0) { 
+                listEl.innerHTML = `<div class="text-center text-slate-500 py-6 text-xs">データがありません</div>`; 
+                return; 
+            }
+
+            processedItems.forEach(item => {
+                const profitColor = item.calcProfit >= 0 ? 'text-emerald-600' : 'text-red-500';
+                const isSaved = savedItems.some(s => s.id === item.id);
                 const itemJson = encodeURIComponent(JSON.stringify(item));
-                const thumbHtml = item.thumb ? `<img src="${item.thumb}" class="w-full h-full object-cover">` : `<span class="text-slate-400 text-[9px] font-bold">NoImg</span>`;
+                
+                const thumbHtml = item.thumb && item.thumb.startsWith('http') 
+                    ? `<img src="${item.thumb}" class="w-full h-full object-cover">` 
+                    : `<span class="text-slate-400 text-[9px] font-bold">NoImg</span>`;
+
                 const html = `
-                <div class="border border-slate-200 bg-white rounded-lg p-2.5 hover:shadow-md cursor-pointer mb-2" onclick="selectItem('${itemJson}')">
+                <div class="border ${isSaved && currentSidebarTab === 'search' ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 bg-white'} rounded-lg p-2.5 hover:shadow-md cursor-pointer transition-all mb-2" onclick="selectItem('${itemJson}')">
                     <div class="flex gap-2">
-                        <div class="w-12 h-12 bg-slate-100 rounded border flex-shrink-0 overflow-hidden">${thumbHtml}</div>
+                        <div class="w-10 h-10 md:w-12 md:h-12 bg-slate-100 rounded border border-slate-200 flex-shrink-0 flex items-center justify-center overflow-hidden relative">
+                            ${thumbHtml}
+                            ${isSaved && currentSidebarTab === 'search' ? '<span class="absolute -top-0.5 -right-0.5 text-xs">📌</span>' : ''}
+                        </div>
                         <div class="flex-1 min-w-0">
                             <h3 class="font-medium text-xs text-slate-800 truncate">${item.title}</h3>
                             <div class="flex justify-between items-end mt-1">
-                                <span class="font-bold text-blue-600">$${item.priceUsd.toFixed(2)}</span>
+                                <span class="font-bold text-xs text-slate-700">$${item.priceUsd.toFixed(2)}</span>
+                                <span class="text-[10px] font-bold ${profitColor}">見込: ¥${item.calcProfit.toLocaleString()}</span>
                             </div>
                         </div>
                     </div>
@@ -259,13 +498,31 @@
         function selectItem(encodedItemJson) {
             const item = JSON.parse(decodeURIComponent(encodedItemJson)); currentItem = item;
             document.getElementById('empty-state').classList.add('hidden'); document.getElementById('calculator-panel').classList.remove('hidden');
+            
             document.getElementById('selected-title').textContent = item.title;
-            document.getElementById('selected-link').href = item.itemUrl || "#";
             document.getElementById('selected-price').textContent = "$" + item.priceUsd.toFixed(2);
-            document.getElementById('selected-sold').textContent = item.soldCount + "件"; // ★ここで90日販売数を表示
+            document.getElementById('selected-sold').textContent = item.soldCount + "件";
+            document.getElementById('selected-link').href = item.itemUrl || "#";
+            
             document.getElementById('calc-price-usd').value = item.priceUsd;
-            document.getElementById('calc-cost-jpy').value = ""; // リサーチ前は空にする
+            document.getElementById('calc-cost-jpy').value = ""; // リサーチ前は意図的に空にする
+            document.getElementById('calc-weight').value = item.weight || 500;
+            
+            alertedHighPrice = false; 
             calculate();
+            
+            if (window.innerWidth < 768) { 
+                const sidebar = document.getElementById('sidebar'); 
+                if (!sidebar.classList.contains('-translate-x-full')) toggleSidebar(); 
+            }
+            document.getElementById('main-content').scrollTop = 0;
+        }
+
+        function openSearch(platform) {
+            if(!currentItem) return;
+            const keywords = currentItem.title.split(' ').slice(0, 3).join('+');
+            const url = platform === 'amazon' ? `https://www.amazon.co.jp/s?k=${keywords}` : `https://jp.mercari.com/search?keyword=${keywords}`;
+            window.open(url, '_blank');
         }
 
         function calculate() {
@@ -276,11 +533,13 @@
             const shippingType = document.getElementById('calc-shipping').value;
             const feePercent = parseFloat(document.getElementById('calc-fee-percent').value) || 17;
 
+            if (!alertedHighPrice && (priceUsd >= 500 || costJpy >= 50000)) { showModal(); alertedHighPrice = true; }
+
             const salesJpy = Math.floor(priceUsd * rate);
             const feeJpy = Math.floor(salesJpy * (feePercent / 100));
             let shippingJpy = (shippingType === 'epacket') ? 900 + Math.floor(weight / 100) * 150 : (shippingType === 'ems') ? 2000 + Math.floor(weight / 100) * 200 : 2300 + Math.floor(weight / 100) * 100;
             
-            // ★損益分岐点の計算
+            // 損益分岐点（目標仕入れ額）の計算
             const breakEven = salesJpy - feeJpy - shippingJpy;
             document.getElementById('break-even-point').textContent = breakEven > 0 ? "¥" + breakEven.toLocaleString('ja-JP') + " 以下" : "利益不可";
 
@@ -294,35 +553,70 @@
             
             const profitEl = document.getElementById('res-profit'); 
             profitEl.textContent = format(profit);
-            profitEl.className = `text-3xl font-black ${profit < 0 ? 'text-red-500' : 'text-emerald-400'}`;
+            profitEl.className = `text-2xl md:text-3xl font-black ${profit < 0 ? 'text-red-500' : 'text-emerald-400'}`;
             document.getElementById('res-margin').textContent = (salesJpy > 0 ? (profit / salesJpy) * 100 : 0).toFixed(1) + "%";
         }
 
-        function openSearch(platform) {
-            if(!currentItem) return;
-            const keywords = currentItem.title.split(' ').slice(0, 3).join('+');
-            const url = platform === 'amazon' ? `https://www.amazon.co.jp/s?k=${keywords}` : `https://jp.mercari.com/search?keyword=${keywords}`;
-            window.open(url, '_blank');
+        // ==========================================
+        // ナビゲーション・UI切り替え関数
+        // ==========================================
+        function switchGlobalNav(viewId) {
+            document.getElementById('view-research').classList.toggle('hidden', viewId !== 'research');
+            document.getElementById('view-sales').classList.toggle('hidden', viewId !== 'sales');
+            document.getElementById('mobile-menu-btn').classList.toggle('hidden', viewId !== 'research');
+            
+            const nR = document.getElementById('nav-research'), nS = document.getElementById('nav-sales');
+            const mnR = document.getElementById('mobile-nav-research'), mnS = document.getElementById('mobile-nav-sales');
+            
+            if(viewId === 'research') {
+                nR.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all";
+                nS.className = "px-4 py-1.5 text-sm font-medium rounded-md text-blue-100 hover:text-white transition-all";
+                mnR.className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all text-center";
+                mnS.className = "flex-1 py-1.5 text-xs font-medium rounded-md text-blue-100 hover:text-white transition-all text-center";
+            } else {
+                nS.className = "px-4 py-1.5 text-sm font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all";
+                nR.className = "px-4 py-1.5 text-sm font-medium rounded-md text-blue-100 hover:text-white transition-all";
+                mnS.className = "flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all text-center";
+                mnR.className = "flex-1 py-1.5 text-xs font-medium rounded-md text-blue-100 hover:text-white transition-all text-center";
+            }
         }
 
-        async function saveToTracker() {
-            if (!currentItem || !GAS_API_URL) return;
-            const btn = document.getElementById('btn-save'); btn.innerHTML = '保存中...'; btn.disabled = true;
-            const payloadData = { id: currentItem.id, title: currentItem.title, priceUsd: parseFloat(document.getElementById('calc-price-usd').value), estCost: parseFloat(document.getElementById('calc-cost-jpy').value) || 0, weight: parseFloat(document.getElementById('calc-weight').value), updatedAt: new Date().toLocaleString('ja-JP') };
-            try {
-                const res = await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify({ target: "tracker", payload: payloadData }) });
-                const data = await res.json();
-                if(data.success) { btn.innerHTML = '✓ 保存完了'; setTimeout(() => btn.innerHTML = 'スプレッドシートに記録', 2000); }
-            } catch(e) { alert("保存エラー"); } finally { btn.disabled = false; }
+        function switchSidebarTab(tabName) {
+            currentSidebarTab = tabName;
+            const tabSearch = document.getElementById('tab-search'), tabSaved = document.getElementById('tab-saved'), controlPanel = document.getElementById('control-panel');
+            if (tabName === 'search') {
+                tabSearch.className = "flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors";
+                tabSaved.className = "flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors border-b-2 border-transparent";
+                controlPanel.classList.remove('hidden');
+            } else {
+                tabSaved.className = "flex-1 py-3 text-sm font-bold text-blue-600 border-b-2 border-blue-600 transition-colors";
+                tabSearch.className = "flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors border-b-2 border-transparent";
+                controlPanel.classList.add('hidden');
+            }
+            renderList();
         }
 
-        // その他UI用関数
-        function switchSidebarTab(tab) { currentSidebarTab = tab; /* UI切り替え処理(略) */ }
-        function toggleSidebar() {}
-        function openSettingsModal() { document.getElementById('settings-gas-url').value = GAS_API_URL; document.getElementById('settings-modal').classList.remove('hidden'); }
-        function closeSettingsModal() { document.getElementById('settings-modal').classList.add('hidden'); }
-        function saveSettings() { GAS_API_URL = document.getElementById('settings-gas-url').value; localStorage.setItem('gasApiUrl', GAS_API_URL); closeSettingsModal(); }
+        function toggleSidebar() {
+            const sidebar = document.getElementById('sidebar'), overlay = document.getElementById('sidebar-overlay');
+            sidebar.classList.toggle('-translate-x-full'); overlay.classList.toggle('hidden');
+        }
+
+        function openSettingsModal() { 
+            document.getElementById('settings-gas-url').value = GAS_API_URL; 
+            document.getElementById('settings-modal').classList.remove('hidden'); 
+        }
+        function closeSettingsModal() { 
+            document.getElementById('settings-modal').classList.add('hidden'); 
+        }
+        function saveSettings() {
+            GAS_API_URL = document.getElementById('settings-gas-url').value.trim();
+            localStorage.setItem('gasApiUrl', GAS_API_URL);
+            closeSettingsModal(); 
+            fetchLatestRate();
+        }
+        function showModal() { document.getElementById('high-price-modal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('high-price-modal').classList.add('hidden'); }
+
     </script>
 </body>
 </html>
