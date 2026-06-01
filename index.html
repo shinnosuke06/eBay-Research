@@ -123,8 +123,8 @@
             </div>
             <div id="control-panel" class="p-3 border-b border-slate-200 bg-slate-50 shrink-0">
                 <div class="flex gap-2 mb-2">
-                    <input type="text" placeholder="Pokemon..." class="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500">
-                    <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors">検索</button>
+                    <input type="text" id="search-input" placeholder="Pokemon..." class="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500" onkeypress="if(event.key === 'Enter') executeSearch()">
+                    <button id="btn-search" onclick="executeSearch()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors">検索</button>
                 </div>
                 <div class="flex gap-2">
                     <select id="filter-select" class="flex-1 border border-slate-300 rounded px-1 py-1 text-xs focus:outline-none focus:border-blue-500 bg-white" onchange="renderList()">
@@ -421,15 +421,41 @@
         let alertedHighPrice = false; 
         let savedItems = [];
         
-        const searchItems = [
-            { id: "item_001", title: "Pokemon Card Game XYZ Booster Box Japan Brand New", priceUsd: 85.00, soldCount: 30, estCost: 5500, weight: 300, thumb: "TCG" },
-            { id: "item_002", title: "Anime Figure ABC 1/7 Scale Japan Authentic Used", priceUsd: 42.50, soldCount: 15, estCost: 2000, weight: 500, thumb: "Fig" },
-            { id: "item_003", title: "Seiko Vintage Watch Automatic Men's", priceUsd: 650.00, soldCount: 5, estCost: 48000, weight: 200, thumb: "Watch" }, 
-            { id: "item_004", title: "Japanese Traditional Matcha Tea Set", priceUsd: 60.00, soldCount: 45, estCost: 3500, weight: 800, thumb: "Tea" }
-        ];
+        let searchItems = []; // ダミーデータを削除し空っぽにします
 
         window.addEventListener('DOMContentLoaded', () => { fetchLatestRate(); renderList(); });
         document.getElementById('global-rate').addEventListener('input', () => { renderList(); if (currentItem) calculate(); });
+
+        // ★追加: 検索実行関数
+        async function executeSearch() {
+            const keyword = document.getElementById('search-input').value.trim();
+            if(!keyword || !GAS_API_URL) return;
+            
+            const btn = document.getElementById('btn-search');
+            btn.innerHTML = "検索中..."; btn.disabled = true;
+            document.getElementById('item-list').innerHTML = `<div class="text-center py-6 loader mx-auto mt-4 border-blue-500"></div><p class="text-center text-xs text-slate-400 mt-2">eBayからデータを取得中...</p>`;
+            
+            try {
+                const res = await fetch(`${GAS_API_URL}?action=search&keyword=${encodeURIComponent(keyword)}`);
+                const data = await res.json();
+                if(data.success) {
+                    searchItems = data.data.map(item => ({
+                        ...item,
+                        estCost: 0, // 仕入れ値は手入力するので0
+                        weight: 500, // デフォルト重量
+                        soldCount: 0
+                    }));
+                    if(currentSidebarTab !== 'search') switchSidebarTab('search');
+                    renderList();
+                } else {
+                    alert("検索エラー: " + data.error);
+                }
+            } catch(e) {
+                alert("通信エラーが発生しました");
+            } finally {
+                btn.innerHTML = "検索"; btn.disabled = false;
+            }
+        }
 
         function saveSettings() {
             GAS_API_URL = document.getElementById('settings-gas-url').value.trim();
@@ -569,11 +595,17 @@
                 const isSaved = savedItems.some(s => s.id === item.id);
                 const itemJson = encodeURIComponent(JSON.stringify(item));
                 
+                // サムネイル画像を表示できるように変更
+                const thumbHtml = item.thumb && item.thumb.startsWith('http') 
+                    ? `<img src="${item.thumb}" class="w-full h-full object-cover">` 
+                    : `<span class="text-slate-400 text-[9px] font-bold">NoImg</span>`;
+
                 const html = `
                 <div class="border ${isSaved && currentSidebarTab === 'search' ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 bg-white'} rounded-lg p-2.5 hover:shadow-md cursor-pointer transition-all" onclick="selectItem('${itemJson}')">
                     <div class="flex gap-2">
-                        <div class="w-10 h-10 md:w-12 md:h-12 bg-slate-100 rounded border border-slate-200 flex-shrink-0 flex items-center justify-center text-slate-400 text-[9px] font-bold relative">
-                            ${item.thumb} ${isSaved && currentSidebarTab === 'search' ? '<span class="absolute -top-1.5 -right-1.5 text-xs">📌</span>' : ''}
+                        <div class="w-10 h-10 md:w-12 md:h-12 bg-slate-100 rounded border border-slate-200 flex-shrink-0 flex items-center justify-center overflow-hidden relative">
+                            ${thumbHtml}
+                            ${isSaved && currentSidebarTab === 'search' ? '<span class="absolute -top-0.5 -right-0.5 text-xs">📌</span>' : ''}
                         </div>
                         <div class="flex-1 min-w-0">
                             <h3 class="font-medium text-xs text-slate-800 truncate">${item.title}</h3>
