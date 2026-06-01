@@ -168,14 +168,10 @@
                                 <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
                                 国内仕入れリサーチ
                             </h3>
-                            <div class="grid grid-cols-2 gap-2 mb-3">
-                                <div class="p-2 bg-yellow-50 rounded border border-yellow-100 text-center">
-                                    <div class="text-[10px] text-yellow-800 mb-0.5">ヤフオク目安</div>
-                                    <div class="text-sm font-bold">¥5,500</div>
-                                </div>
-                                <div class="p-2 bg-red-50 rounded border border-red-100 text-center">
-                                    <div class="text-[10px] text-red-800 mb-0.5">楽天目安</div>
-                                    <div class="text-sm font-bold">¥6,200</div>
+                            <div class="grid grid-cols-1 gap-2 mb-3">
+                                <div class="p-2 bg-emerald-50 rounded border border-emerald-100 text-center">
+                                    <div class="text-[10px] text-emerald-800 mb-0.5">目標仕入れ上限額（損益分岐点）</div>
+                                    <div class="text-sm font-bold text-emerald-700" id="break-even-point">¥0 以下</div>
                                 </div>
                             </div>
                             <div class="grid grid-cols-2 gap-2">
@@ -644,13 +640,18 @@
         function calculate() {
             const rate = parseFloat(document.getElementById('global-rate').value) || 150, priceUsd = parseFloat(document.getElementById('calc-price-usd').value) || 0;
             const costJpy = parseFloat(document.getElementById('calc-cost-jpy').value) || 0, weight = parseFloat(document.getElementById('calc-weight').value) || 0;
-            const packCost = parseFloat(document.getElementById('calc-pack').value) || 0, shippingType = document.getElementById('calc-shipping').value, feePercent = parseFloat(document.getElementById('calc-fee-percent').value) || 17;
+            const packCost = parseFloat(document.getElementById('calc-pack') ? document.getElementById('calc-pack').value : 0) || 0;
+            const shippingType = document.getElementById('calc-shipping').value, feePercent = parseFloat(document.getElementById('calc-fee-percent').value) || 17;
 
             if (!alertedHighPrice && (priceUsd >= 500 || costJpy >= 50000)) { showModal(); alertedHighPrice = true; }
 
             const salesJpy = Math.floor(priceUsd * rate), feeJpy = Math.floor(salesJpy * (feePercent / 100));
             let shippingJpy = (shippingType === 'epacket') ? 900 + Math.floor(weight / 100) * 150 : (shippingType === 'ems') ? 2000 + Math.floor(weight / 100) * 200 : 2300 + Math.floor(weight / 100) * 100;
             const totalCost = costJpy + feeJpy + shippingJpy + packCost, profit = salesJpy - totalCost;
+
+            // 追加: 損益分岐点（目標仕入れ上限額）の計算
+            const breakEven = salesJpy - feeJpy - shippingJpy - packCost;
+            document.getElementById('break-even-point').textContent = breakEven > 0 ? "¥" + breakEven.toLocaleString('ja-JP') + " 以下" : "利益不可";
 
             const format = (num) => "¥" + num.toLocaleString('ja-JP');
             document.getElementById('res-sales').textContent = format(salesJpy); document.getElementById('res-cost').textContent = "- " + format(costJpy);
