@@ -328,10 +328,13 @@
         let searchItems = [];
         let savedItems = [];
 
+        // ★修正: アプリ起動時に「為替レート」と「追跡リスト」の両方を取得するように変更
         window.addEventListener('DOMContentLoaded', () => { 
             fetchLatestRate(); 
+            fetchTrackerData(); // ← これを追加しました
             renderList(); 
         });
+        
         document.getElementById('global-rate').addEventListener('input', () => { 
             renderList(); 
             if (currentItem) calculate(); 
@@ -340,6 +343,22 @@
         // ==========================================
         // API通信関数
         // ==========================================
+        // ★追加: スプレッドシートから追跡リストのデータを読み込む関数
+        async function fetchTrackerData() {
+            if(!GAS_API_URL) return;
+            try {
+                const res = await fetch(`${GAS_API_URL}?action=getTrackerData`);
+                const data = await res.json();
+                if(data.success) {
+                    savedItems = data.data; // 読み込んだデータを配列にセット
+                    document.getElementById('saved-count').textContent = savedItems.length; // 件数を更新
+                    renderList(); // リストを再描画
+                }
+            } catch(e) {
+                console.error("追跡リストの取得に失敗しました", e);
+            }
+        }
+
         async function fetchLatestRate() {
             if(!GAS_API_URL) return;
             const loader = document.getElementById('rate-loader'), status = document.getElementById('rate-status');
@@ -414,7 +433,7 @@
                 estCost: parseFloat(document.getElementById('calc-cost-jpy').value) || 0,
                 weight: parseFloat(document.getElementById('calc-weight').value),
                 updatedAt: new Date().toLocaleString('ja-JP'),
-                thumb: currentItem.thumb // ★GAS側に画像URLを渡す
+                thumb: currentItem.thumb
             };
 
             try {
@@ -518,7 +537,6 @@
             });
         }
 
-        // ★Google Lens機能と高画質画像表示
         function selectItem(encodedItemJson) {
             const item = JSON.parse(decodeURIComponent(encodedItemJson)); currentItem = item;
             document.getElementById('empty-state').classList.add('hidden'); document.getElementById('calculator-panel').classList.remove('hidden');
@@ -528,7 +546,6 @@
             const lensLinkEl = document.getElementById('lens-link');
             
             if (item.thumb) {
-                // 画質を上げて表示する
                 let highResUrl = item.thumb;
                 if(highResUrl.includes('s-l225')) highResUrl = highResUrl.replace('s-l225', 's-l1000');
                 else if(highResUrl.includes('s-l500')) highResUrl = highResUrl.replace('s-l500', 's-l1000');
@@ -537,7 +554,6 @@
                 imgEl.classList.remove('hidden');
                 noImgEl.classList.add('hidden');
                 
-                // Google Lens連携URLの生成
                 lensLinkEl.href = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(highResUrl)}`;
                 lensLinkEl.classList.remove('hidden');
             } else {
@@ -553,7 +569,7 @@
             document.getElementById('selected-link').href = item.itemUrl || "#";
             
             document.getElementById('calc-price-usd').value = item.priceUsd;
-            document.getElementById('calc-cost-jpy').value = ""; 
+            document.getElementById('calc-cost-jpy').value = item.estCost > 0 ? item.estCost : ""; // 追跡リストに仕入れ値があれば復元
             document.getElementById('calc-weight').value = item.weight || 500;
             
             alertedHighPrice = false; 
@@ -600,7 +616,7 @@
             
             const profitEl = document.getElementById('res-profit'); 
             profitEl.textContent = format(profit);
-            profitEl.className = `text-2xl md:text-4xl font-black ${profit < 0 ? 'text-red-500' : 'text-emerald-400'}`;
+            profitEl.className = `text-2xl md:text-4xl font-black ${profit < 0 ? 'text-red-500' : 'textemerald-400'}`;
             document.getElementById('res-margin').textContent = (salesJpy > 0 ? (profit / salesJpy) * 100 : 0).toFixed(1) + "%";
         }
 
@@ -660,6 +676,7 @@
             localStorage.setItem('gasApiUrl', GAS_API_URL);
             closeSettingsModal(); 
             fetchLatestRate();
+            fetchTrackerData(); // URL設定後にもう一度読み込み
         }
         function showModal() { document.getElementById('high-price-modal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('high-price-modal').classList.add('hidden'); }
