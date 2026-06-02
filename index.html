@@ -328,10 +328,11 @@
         let searchItems = [];
         let savedItems = [];
 
-        // ★修正: アプリ起動時に「為替レート」と「追跡リスト」の両方を取得するように変更
+        // ★修正: アプリ起動時に検索履歴も読み込むように変更
         window.addEventListener('DOMContentLoaded', () => { 
+            loadSearchHistory(); // ← これを追加しました
             fetchLatestRate(); 
-            fetchTrackerData(); // ← これを追加しました
+            fetchTrackerData(); 
             renderList(); 
         });
         
@@ -343,6 +344,22 @@
         // ==========================================
         // API通信関数
         // ==========================================
+        // ★追加: ローカルストレージから前回の検索結果とキーワードを読み込む関数
+        function loadSearchHistory() {
+            const history = localStorage.getItem('searchItems');
+            if (history) {
+                try {
+                    searchItems = JSON.parse(history);
+                } catch (e) {
+                    console.error("検索履歴の読み込みに失敗しました", e);
+                }
+            }
+            const lastKeyword = localStorage.getItem('lastKeyword');
+            if (lastKeyword) {
+                document.getElementById('search-input').value = lastKeyword;
+            }
+        }
+
         // ★追加: スプレッドシートから追跡リストのデータを読み込む関数
         async function fetchTrackerData() {
             if(!GAS_API_URL) return;
@@ -403,6 +420,11 @@
                         weight: 500,
                         soldCount: totalSold
                     }));
+                    
+                    // ★追加: 検索結果とキーワードをブラウザに保存（次回起動時のため）
+                    localStorage.setItem('searchItems', JSON.stringify(searchItems));
+                    localStorage.setItem('lastKeyword', keyword);
+
                     if(currentSidebarTab !== 'search') switchSidebarTab('search');
                     renderList();
                 } else {
@@ -433,7 +455,8 @@
                 estCost: parseFloat(document.getElementById('calc-cost-jpy').value) || 0,
                 weight: parseFloat(document.getElementById('calc-weight').value),
                 updatedAt: new Date().toLocaleString('ja-JP'),
-                thumb: currentItem.thumb
+                thumb: currentItem.thumb,
+                itemUrl: currentItem.itemUrl // ★これを追加：eBayのURLもGASに送る
             };
 
             try {
