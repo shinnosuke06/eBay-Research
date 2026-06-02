@@ -123,8 +123,11 @@
                 <button id="tab-saved" class="flex-1 py-3 text-sm font-bold text-slate-500 hover:text-slate-700 transition-colors border-b-2 border-transparent" onclick="switchSidebarTab('saved')">📌 追跡 (<span id="saved-count">0</span>)</button>
             </div>
             <div id="control-panel" class="p-3 border-b border-slate-200 bg-slate-50 shrink-0">
-                <div class="flex gap-2 mb-2">
-                    <input type="text" id="search-input" placeholder="キーワード (例: Pokemon)" class="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500" onkeypress="if(event.key === 'Enter') executeSearch()">
+                <div class="flex gap-2 mb-2 relative">
+                    <!-- ★追加: 検索履歴用の datalist を紐付け -->
+                    <input type="text" id="search-input" list="search-history-list" placeholder="キーワード (例: Pokemon)" class="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm focus:outline-none focus:border-blue-500" onkeypress="if(event.key === 'Enter') executeSearch()">
+                    <datalist id="search-history-list"></datalist>
+                    
                     <button id="btn-search" onclick="executeSearch()" class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 rounded text-sm font-medium transition-colors">検索</button>
                 </div>
                 <!-- 検索条件フィルタ -->
@@ -277,8 +280,8 @@
                                     <div class="text-[10px] text-slate-400 mt-1">利益率: <span id="res-margin" class="font-bold text-white">0%</span></div>
                                 </div>
                             </div>
-                            <button id="btn-save" onclick="saveToTracker()" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 md:py-4 rounded-lg text-sm font-bold transition-colors shadow-md">
-                                スプレッドシートに記録
+                            <button id="btn-save" onclick="saveToTracker()" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 md:py-4 rounded-lg text-sm font-bold transition-colors shadow-md flex items-center justify-center gap-2">
+                                <span>スプレッドシートに記録</span>
                             </button>
                         </div>
                     </div>
@@ -327,10 +330,10 @@
         let alertedHighPrice = false; 
         let searchItems = [];
         let savedItems = [];
+        let keywordHistory = []; // ★検索履歴用の配列
 
-        // ★修正: アプリ起動時に検索履歴も読み込むように変更
         window.addEventListener('DOMContentLoaded', () => { 
-            loadSearchHistory(); // ← これを追加しました
+            loadSearchHistory(); 
             fetchLatestRate(); 
             fetchTrackerData(); 
             renderList(); 
@@ -342,38 +345,63 @@
         });
 
         // ==========================================
-        // API通信関数
+        // API通信・履歴管理関数
         // ==========================================
-        // ★追加: ローカルストレージから前回の検索結果とキーワードを読み込む関数
+        // ★追加: 検索履歴と過去の検索結果を読み込む
         function loadSearchHistory() {
-            const history = localStorage.getItem('searchItems');
-            if (history) {
+            const historyStr = localStorage.getItem('keywordHistory');
+            if (historyStr) {
                 try {
-                    searchItems = JSON.parse(history);
-                } catch (e) {
-                    console.error("検索履歴の読み込みに失敗しました", e);
-                }
+                    keywordHistory = JSON.parse(historyStr);
+                    updateHistoryDatalist();
+                } catch(e) {}
             }
+            
+            const savedSearch = localStorage.getItem('searchItems');
+            if (savedSearch) {
+                try {
+                    searchItems = JSON.parse(savedSearch);
+                } catch(e) {}
+            }
+            
             const lastKeyword = localStorage.getItem('lastKeyword');
-            if (lastKeyword) {
-                document.getElementById('search-input').value = lastKeyword;
-            }
+            if (lastKeyword) document.getElementById('search-input').value = lastKeyword;
         }
 
-        // ★追加: スプレッドシートから追跡リストのデータを読み込む関数
+        // ★追加: プルダウン（datalist）に履歴をセットする
+        function updateHistoryDatalist() {
+            const datalist = document.getElementById('search-history-list');
+            datalist.innerHTML = '';
+            keywordHistory.forEach(kw => {
+                const option = document.createElement('option');
+                option.value = kw;
+                datalist.appendChild(option);
+            });
+        }
+
+        // ★追加: 検索されたキーワードを履歴に保存する
+        function saveKeywordToHistory(keyword) {
+            // すでに履歴にあれば一度消して、先頭に持ってくる
+            keywordHistory = keywordHistory.filter(kw => kw !== keyword);
+            keywordHistory.unshift(keyword);
+            if (keywordHistory.length > 10) keywordHistory.pop(); // 最新10件まで
+            
+            localStorage.setItem('keywordHistory', JSON.stringify(keywordHistory));
+            localStorage.setItem('lastKeyword', keyword);
+            updateHistoryDatalist();
+        }
+
         async function fetchTrackerData() {
             if(!GAS_API_URL) return;
             try {
                 const res = await fetch(`${GAS_API_URL}?action=getTrackerData`);
                 const data = await res.json();
                 if(data.success) {
-                    savedItems = data.data; // 読み込んだデータを配列にセット
-                    document.getElementById('saved-count').textContent = savedItems.length; // 件数を更新
-                    renderList(); // リストを再描画
+                    savedItems = data.data; 
+                    document.getElementById('saved-count').textContent = savedItems.length; 
+                    renderList(); 
                 }
-            } catch(e) {
-                console.error("追跡リストの取得に失敗しました", e);
-            }
+            } catch(e) { console.error("追跡リスト取得失敗", e); }
         }
 
         async function fetchLatestRate() {
@@ -407,6 +435,8 @@
             btn.innerHTML = "検索中..."; btn.disabled = true;
             document.getElementById('item-list').innerHTML = `<div class="text-center py-6 loader mx-auto mt-4 border-blue-500"></div><p class="text-center text-xs text-slate-400 mt-2">eBayから最大200件のデータを取得中...<br>数秒お待ち下さい</p>`;
             
+            saveKeywordToHistory(keyword); // 履歴を保存
+
             try {
                 const query = `action=search&keyword=${encodeURIComponent(keyword)}&status=${status}&location=${location}&minPriceUsd=${minPriceUsd}`;
                 const res = await fetch(`${GAS_API_URL}?${query}`);
@@ -415,15 +445,10 @@
                 if(data.success) {
                     const totalSold = data.data.totalEntries || 0;
                     searchItems = data.data.items.map(item => ({
-                        ...item,
-                        estCost: 0,
-                        weight: 500,
-                        soldCount: totalSold
+                        ...item, estCost: 0, weight: 500, soldCount: totalSold
                     }));
                     
-                    // ★追加: 検索結果とキーワードをブラウザに保存（次回起動時のため）
-                    localStorage.setItem('searchItems', JSON.stringify(searchItems));
-                    localStorage.setItem('lastKeyword', keyword);
+                    localStorage.setItem('searchItems', JSON.stringify(searchItems)); // 検索結果を記憶
 
                     if(currentSidebarTab !== 'search') switchSidebarTab('search');
                     renderList();
@@ -439,14 +464,17 @@
             }
         }
 
+        // ★修正: リトライ機能（最大3回自動でやり直す）を搭載
         async function saveToTracker() {
             if (!currentItem || !GAS_API_URL) {
-                alert("エラー: GASのURLが設定されていません。");
-                return;
+                alert("エラー: GASのURLが設定されていません。"); return;
             }
+            
             const btn = document.getElementById('btn-save');
             const originalText = btn.innerHTML;
-            btn.disabled = true; btn.innerHTML = '保存中...'; btn.classList.replace('bg-emerald-600', 'bg-slate-600');
+            btn.disabled = true; 
+            btn.innerHTML = '<span class="loader border-white w-4 h-4 mr-2"></span>保存中...'; 
+            btn.classList.replace('bg-emerald-600', 'bg-slate-600');
 
             const payloadData = {
                 id: currentItem.id,
@@ -456,40 +484,46 @@
                 weight: parseFloat(document.getElementById('calc-weight').value),
                 updatedAt: new Date().toLocaleString('ja-JP'),
                 thumb: currentItem.thumb,
-                itemUrl: currentItem.itemUrl // ★これを追加：eBayのURLもGASに送る
+                itemUrl: currentItem.itemUrl
             };
 
-            try {
-                const response = await fetch(GAS_API_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'text/plain' }, 
-                    body: JSON.stringify({ target: "tracker", payload: payloadData })
-                });
-                const data = await response.json();
-                
-                if (data.success) {
-                    const existingIndex = savedItems.findIndex(i => i.id === payloadData.id);
-                    if (existingIndex >= 0) savedItems[existingIndex] = payloadData;
-                    else savedItems.push(payloadData);
-                    
-                    document.getElementById('saved-count').textContent = savedItems.length;
-                    
-                    btn.innerHTML = '✓ 保存完了';
-                    btn.classList.replace('bg-slate-600', 'bg-emerald-500');
-                } else {
+            // 自動リトライロジック
+            let success = false;
+            let errorMsg = "";
+            for (let i = 0; i < 3; i++) {
+                try {
+                    const response = await fetch(GAS_API_URL, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'text/plain' }, 
+                        body: JSON.stringify({ target: "tracker", payload: payloadData })
+                    });
+                    const data = await response.json();
+                    if (data.success) { success = true; break; }
                     throw new Error(data.error);
+                } catch (error) {
+                    errorMsg = error.message;
+                    if (i < 2) await new Promise(r => setTimeout(r, 1500)); // 失敗したら1.5秒待ってもう一度
                 }
-            } catch (error) {
-                alert("保存に失敗しました。");
+            }
+
+            if (success) {
+                const existingIndex = savedItems.findIndex(i => i.id === payloadData.id);
+                if (existingIndex >= 0) savedItems[existingIndex] = payloadData;
+                else savedItems.push(payloadData);
+                document.getElementById('saved-count').textContent = savedItems.length;
+                btn.innerHTML = '✓ 保存完了';
+                btn.classList.replace('bg-slate-600', 'bg-emerald-500');
+            } else {
+                alert("保存に失敗しました（タイムアウト）。もう一度お試しください。");
                 btn.innerHTML = '保存失敗';
                 btn.classList.replace('bg-slate-600', 'bg-red-500');
-            } finally {
-                setTimeout(() => {
-                    btn.disabled = false; btn.innerHTML = originalText;
-                    btn.classList.remove('bg-emerald-500', 'bg-red-500', 'bg-slate-600');
-                    btn.classList.add('bg-emerald-600');
-                }, 2000);
             }
+
+            setTimeout(() => {
+                btn.disabled = false; btn.innerHTML = originalText;
+                btn.classList.remove('bg-emerald-500', 'bg-red-500', 'bg-slate-600');
+                btn.classList.add('bg-emerald-600');
+            }, 2500);
         }
 
         // ==========================================
@@ -518,7 +552,6 @@
 
             if (currentSidebarTab === 'search') {
                 if (filterType === 'profit-plus') processedItems = processedItems.filter(item => item.calcProfit > 0);
-                
                 if (sortType === 'price-desc') processedItems.sort((a, b) => b.priceUsd - a.priceUsd);
                 else if (sortType === 'price-asc') processedItems.sort((a, b) => a.priceUsd - b.priceUsd);
             } else { 
@@ -527,28 +560,27 @@
 
             listEl.innerHTML = ''; 
             if (processedItems.length === 0) { 
-                listEl.innerHTML = `<div class="text-center text-slate-500 py-6 text-xs">データがありません</div>`; 
-                return; 
+                listEl.innerHTML = `<div class="text-center text-slate-500 py-6 text-xs">データがありません</div>`; return; 
             }
 
             processedItems.forEach(item => {
                 const profitColor = item.calcProfit >= 0 ? 'text-emerald-600' : 'text-red-500';
                 const isSaved = savedItems.some(s => s.id === item.id);
-                const itemJson = encodeURIComponent(JSON.stringify(item));
                 
                 const thumbHtml = item.thumb && item.thumb.startsWith('http') 
                     ? `<img src="${item.thumb}" class="w-full h-full object-cover">` 
                     : `<span class="text-slate-400 text-[9px] font-bold">NoImg</span>`;
 
+                // ★修正: 記号バグを防ぐため、JSONではなく安全な「商品のID」を渡すように変更
                 const html = `
-                <div class="border ${isSaved && currentSidebarTab === 'search' ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 bg-white'} rounded-lg p-2.5 hover:shadow-md cursor-pointer transition-all mb-2" onclick="selectItem('${itemJson}')">
+                <div class="border ${isSaved && currentSidebarTab === 'search' ? 'border-emerald-300 bg-emerald-50' : 'border-slate-200 bg-white'} rounded-lg p-2.5 hover:shadow-md cursor-pointer transition-all mb-2" onclick="selectItemById('${item.id}', '${currentSidebarTab}')">
                     <div class="flex gap-2">
                         <div class="w-10 h-10 md:w-14 md:h-14 bg-slate-100 rounded border border-slate-200 flex-shrink-0 flex items-center justify-center overflow-hidden relative">
                             ${thumbHtml}
                             ${isSaved && currentSidebarTab === 'search' ? '<span class="absolute -top-0.5 -right-0.5 text-xs">📌</span>' : ''}
                         </div>
                         <div class="flex-1 min-w-0">
-                            <h3 class="font-medium text-xs text-slate-800 truncate">${item.title}</h3>
+                            <h3 class="font-medium text-xs text-slate-800 truncate" title="${item.title}">${item.title}</h3>
                             <div class="flex justify-between items-end mt-1">
                                 <span class="font-bold text-xs text-slate-700">$${item.priceUsd.toFixed(2)}</span>
                                 <span class="text-[10px] font-bold ${profitColor}">見込: ¥${item.calcProfit.toLocaleString()}</span>
@@ -560,8 +592,13 @@
             });
         }
 
-        function selectItem(encodedItemJson) {
-            const item = JSON.parse(decodeURIComponent(encodedItemJson)); currentItem = item;
+        // ★追加: 安全にIDからアイテムを選択する関数（これでもうバグりません）
+        function selectItemById(itemId, tabType) {
+            let targetData = tabType === 'search' ? searchItems : savedItems;
+            const item = targetData.find(i => i.id === itemId);
+            if (!item) return;
+            
+            currentItem = item;
             document.getElementById('empty-state').classList.add('hidden'); document.getElementById('calculator-panel').classList.remove('hidden');
             
             const imgEl = document.getElementById('selected-image');
@@ -573,17 +610,10 @@
                 if(highResUrl.includes('s-l225')) highResUrl = highResUrl.replace('s-l225', 's-l1000');
                 else if(highResUrl.includes('s-l500')) highResUrl = highResUrl.replace('s-l500', 's-l1000');
                 
-                imgEl.src = highResUrl;
-                imgEl.classList.remove('hidden');
-                noImgEl.classList.add('hidden');
-                
-                lensLinkEl.href = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(highResUrl)}`;
-                lensLinkEl.classList.remove('hidden');
+                imgEl.src = highResUrl; imgEl.classList.remove('hidden'); noImgEl.classList.add('hidden');
+                lensLinkEl.href = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(highResUrl)}`; lensLinkEl.classList.remove('hidden');
             } else {
-                imgEl.src = "";
-                imgEl.classList.add('hidden');
-                noImgEl.classList.remove('hidden');
-                lensLinkEl.classList.add('hidden');
+                imgEl.src = ""; imgEl.classList.add('hidden'); noImgEl.classList.remove('hidden'); lensLinkEl.classList.add('hidden');
             }
 
             document.getElementById('selected-title').textContent = item.title;
@@ -592,7 +622,7 @@
             document.getElementById('selected-link').href = item.itemUrl || "#";
             
             document.getElementById('calc-price-usd').value = item.priceUsd;
-            document.getElementById('calc-cost-jpy').value = item.estCost > 0 ? item.estCost : ""; // 追跡リストに仕入れ値があれば復元
+            document.getElementById('calc-cost-jpy').value = item.estCost > 0 ? item.estCost : ""; 
             document.getElementById('calc-weight').value = item.weight || 500;
             
             alertedHighPrice = false; 
@@ -639,7 +669,7 @@
             
             const profitEl = document.getElementById('res-profit'); 
             profitEl.textContent = format(profit);
-            profitEl.className = `text-2xl md:text-4xl font-black ${profit < 0 ? 'text-red-500' : 'textemerald-400'}`;
+            profitEl.className = `text-2xl md:text-4xl font-black ${profit < 0 ? 'text-red-500' : 'text-emerald-400'}`;
             document.getElementById('res-margin').textContent = (salesJpy > 0 ? (profit / salesJpy) * 100 : 0).toFixed(1) + "%";
         }
 
@@ -699,7 +729,7 @@
             localStorage.setItem('gasApiUrl', GAS_API_URL);
             closeSettingsModal(); 
             fetchLatestRate();
-            fetchTrackerData(); // URL設定後にもう一度読み込み
+            fetchTrackerData(); 
         }
         function showModal() { document.getElementById('high-price-modal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('high-price-modal').classList.add('hidden'); }
