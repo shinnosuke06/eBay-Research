@@ -19,6 +19,9 @@
         .loader { border: 3px solid #f3f3f3; border-top: 3px solid #3498db; border-radius: 50%; width: 20px; height: 20px; animation: spin 1s linear infinite; }
         @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
         body { overscroll-behavior-y: none; scroll-behavior: smooth; }
+        .manual-h3 { @apply text-lg font-bold text-slate-800 mb-3 border-l-4 border-blue-500 pl-3; }
+        .alert-box { @apply bg-red-50 border border-red-200 text-red-800 p-4 rounded-lg text-sm mb-4; }
+        .tip-box { @apply bg-emerald-50 border border-emerald-200 text-emerald-800 p-4 rounded-lg text-sm mb-4; }
     </style>
 </head>
 <body class="bg-slate-50 text-slate-800 font-sans h-screen flex flex-col overflow-hidden relative">
@@ -73,7 +76,7 @@
                 <nav class="hidden md:flex ml-6 bg-blue-700 rounded-lg p-0.5">
                     <button onclick="switchGlobalNav('research')" id="nav-research" class="px-4 py-1.5 text-sm font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all">リサーチ</button>
                     <button onclick="switchGlobalNav('sales')" id="nav-sales" class="px-4 py-1.5 text-sm font-medium rounded-md text-blue-100 hover:text-white transition-all">販売管理</button>
-                    <button onclick="switchGlobalNav('manual')" id="nav-manual" class="px-4 py-1.5 text-sm font-medium rounded-md text-blue-100 hover:text-white transition-all">使い方</button>
+                    <button onclick="switchGlobalNav('manual')" id="nav-manual" class="px-4 py-1.5 text-sm font-medium rounded-md text-blue-100 hover:text-white transition-all">マニュアル</button>
                 </nav>
             </div>
             
@@ -97,7 +100,7 @@
         <nav class="md:hidden mt-2 flex bg-blue-700/50 rounded-lg p-0.5 max-w-sm mx-auto">
              <button onclick="switchGlobalNav('research')" id="mobile-nav-research" class="flex-1 py-1.5 text-xs font-medium rounded-md bg-white text-blue-700 shadow-sm transition-all text-center">リサーチ</button>
              <button onclick="switchGlobalNav('sales')" id="mobile-nav-sales" class="flex-1 py-1.5 text-xs font-medium rounded-md text-blue-100 hover:text-white transition-all text-center">販売管理</button>
-             <button onclick="switchGlobalNav('manual')" id="mobile-nav-manual" class="flex-1 py-1.5 text-xs font-medium rounded-md text-blue-100 hover:text-white transition-all text-center">使い方</button>
+             <button onclick="switchGlobalNav('manual')" id="mobile-nav-manual" class="flex-1 py-1.5 text-xs font-medium rounded-md text-blue-100 hover:text-white transition-all text-center">マニュアル</button>
         </nav>
     </header>
 
@@ -166,9 +169,6 @@
                             <div class="flex flex-wrap justify-between items-start gap-2 mb-4">
                                 <h2 id="selected-title" class="text-base md:text-xl font-bold text-slate-800 leading-snug flex-1 min-w-[200px]">商品名</h2>
                                 <div class="flex gap-2 mt-1">
-                                    <a id="lens-link" href="#" target="_blank" class="shrink-0 bg-amber-50 hover:bg-amber-100 text-amber-800 text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-full border border-amber-200 transition-colors shadow-sm flex items-center gap-1 hidden">
-                                        📷 画像で仕入先検索
-                                    </a>
                                     <a id="selected-link" href="#" target="_blank" class="shrink-0 bg-blue-100 hover:bg-blue-200 text-blue-700 text-[10px] md:text-xs font-bold px-3 py-1.5 rounded-full border border-blue-200 transition-colors shadow-sm flex items-center gap-1">
                                         eBayで開く <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path></svg>
                                     </a>
@@ -176,11 +176,11 @@
                             </div>
                             <div class="flex flex-wrap gap-3 text-sm mt-auto">
                                 <div class="bg-blue-50 px-4 py-3 rounded-lg border border-blue-100 flex-1 min-w-[140px]">
-                                    <span class="text-slate-500 text-[10px] md:text-xs font-medium block mb-0.5">eBay価格:</span>
+                                    <span class="text-slate-500 text-[10px] md:text-xs font-medium block mb-0.5">eBay出品価格 (本体):</span>
                                     <span id="selected-price" class="font-black text-blue-600 text-xl md:text-2xl">$0.00</span>
                                 </div>
                                 <div class="bg-slate-50 px-4 py-3 rounded-lg border border-slate-200 flex-1 min-w-[140px]">
-                                    <span class="text-slate-500 text-[10px] md:text-xs font-medium block mb-0.5">現在出品中の総件数 (ライバル数):</span>
+                                    <span class="text-slate-500 text-[10px] md:text-xs font-medium block mb-0.5">現在出品中のライバル数:</span>
                                     <span id="selected-sold" class="font-black text-slate-700 text-xl md:text-2xl">0件</span>
                                 </div>
                             </div>
@@ -190,6 +190,7 @@
 
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
                     <div class="space-y-4 md:space-y-6">
+                        <!-- 仕入れ検索 -->
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                             <h3 class="font-bold text-slate-700 text-sm md:text-base mb-3 flex items-center gap-2">
                                 <svg class="w-4 h-4 md:w-5 md:h-5 text-indigo-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
@@ -207,39 +208,71 @@
                             </div>
                         </div>
 
+                        <!-- シミュレーション入力 (重量連動・自動切り上げ版) -->
                         <div class="bg-white p-4 rounded-xl shadow-sm border border-slate-200">
                             <h3 class="font-bold text-slate-700 text-sm md:text-base mb-3 flex items-center gap-2">
                                 <svg class="w-4 h-4 md:w-5 md:h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path></svg>
-                                シミュレーション入力
+                                送料別 利益シミュレーション
                             </h3>
-                            <div class="space-y-3">
+                            <div class="space-y-4">
                                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                                     <div>
-                                        <label class="block text-[10px] md:text-xs text-slate-500 mb-1">販売価格(USD)</label>
-                                        <input type="number" id="calc-price-usd" value="0" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-slate-50" oninput="calculate()">
+                                        <label class="block text-[10px] md:text-xs text-slate-500 mb-1">商品販売価格(USD)</label>
+                                        <input type="number" id="calc-price-usd" value="0" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-slate-50 focus:outline-none" oninput="calculate()">
                                     </div>
                                     <div>
                                         <label class="block text-[10px] md:text-xs text-slate-500 mb-1">実仕入価格(円)</label>
                                         <input type="number" id="calc-cost-jpy" value="" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:ring-1 focus:ring-blue-500" oninput="calculate()">
                                     </div>
                                 </div>
-                                <div class="grid grid-cols-2 gap-3">
-                                    <div>
-                                        <label class="block text-[10px] md:text-xs text-slate-500 mb-1">重量(g)</label>
-                                        <input type="number" id="calc-weight" value="500" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white" oninput="calculate()">
-                                    </div>
-                                    <div>
-                                        <label class="block text-[10px] md:text-xs text-slate-500 mb-1">手数料率(%)</label>
-                                        <input type="number" id="calc-fee-percent" value="17" step="0.1" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white" oninput="calculate()">
-                                    </div>
-                                </div>
+
+                                <!-- カテゴリ選択 -->
                                 <div>
-                                    <label class="block text-[10px] md:text-xs text-slate-500 mb-1">配送サービス</label>
-                                    <select id="calc-shipping" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white" onchange="calculate()">
-                                        <option value="epacket">日本郵便 (小型包装物)</option>
-                                        <option value="ems">日本郵便 (EMS)</option>
-                                        <option value="fedex">FedEx/DHL</option>
+                                    <label class="block text-[10px] md:text-xs font-bold text-slate-700 mb-1">eBay カテゴリ (手数料率の決定)</label>
+                                    <select id="calc-category" class="w-full border border-slate-300 rounded px-2 py-1.5 text-sm bg-white focus:outline-none" onchange="calculate()">
+                                        <option value="13.6">ほとんどのカテゴリ (おもちゃ, フィギュア, アニメ等) - 13.6%</option>
+                                        <option value="13.25">コレクション (トレカ, コミックなど) - 13.25%</option>
+                                        <option value="15.3">本・雑誌・音楽 - 15.3%</option>
+                                        <option value="15.0">服・シューズ・ジュエリー - 15.0%</option>
+                                        <option value="8.0">スニーカー ($150以上) - 8.0%</option>
+                                        <option value="6.7">楽器 (ギター&ベース) - 6.7%</option>
                                     </select>
+                                </div>
+
+                                <!-- EMSの重量と地域の動的計算エリア -->
+                                <div class="p-3 bg-blue-50 border border-blue-200 rounded-lg space-y-3">
+                                    <div class="flex justify-between items-end gap-2">
+                                        <div class="flex-1">
+                                            <label class="block text-[10px] md:text-xs font-bold text-blue-800 mb-1">送料設定</label>
+                                            <select id="calc-shipping-payer" class="w-full border border-blue-200 rounded px-2 py-1.5 text-sm bg-white text-blue-900 focus:outline-none" onchange="calculate()">
+                                                <option value="buyer">購入者負担 (送料別) ※おすすめ</option>
+                                                <option value="seller">出品者負担 (送料無料)</option>
+                                            </select>
+                                        </div>
+                                        <div class="w-1/3">
+                                            <label class="block text-[10px] md:text-xs text-blue-700 mb-1">梱包後 重量(g)</label>
+                                            <input type="number" id="calc-weight" value="500" step="50" class="w-full border border-blue-200 rounded px-2 py-1.5 text-sm bg-white focus:outline-none" oninput="calculate()">
+                                        </div>
+                                    </div>
+                                    <div>
+                                        <label class="block text-[10px] md:text-xs text-blue-700 mb-1">EMS 発送地域 (※米国宛は除外)</label>
+                                        <select id="calc-region" class="w-full border border-blue-200 rounded px-2 py-1.5 text-sm bg-white font-bold text-blue-900 focus:outline-none focus:ring-1 focus:ring-blue-500" onchange="calculate()">
+                                            <option value="z3" selected>欧州・豪州・カナダ・中東など (第3地帯)</option>
+                                            <option value="z2">アジア圏 ※中国・韓国・台湾除く (第2地帯)</option>
+                                            <option value="z1">中国・韓国・台湾 (第1地帯)</option>
+                                            <option value="z5">ブラジル・南米・アフリカ (第5地帯)</option>
+                                        </select>
+                                    </div>
+                                    <div class="text-[10px] text-blue-600 bg-white p-2 rounded border border-blue-100">
+                                        <div class="flex justify-between mb-1">
+                                            <span>判定されたEMS実費:</span>
+                                            <span id="display-ems-jpy" class="font-bold">¥0</span>
+                                        </div>
+                                        <div class="flex justify-between">
+                                            <span>バイヤー請求送料 <span class="text-[9px]">(端数切り上げ設定)</span>:</span>
+                                            <span id="display-shipping-usd" class="font-bold text-blue-800">$0</span>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -247,20 +280,24 @@
 
                     <div class="lg:sticky lg:top-6 lg:self-start">
                         <div class="bg-slate-800 text-white p-4 md:p-5 rounded-xl shadow-lg">
-                            <h3 class="text-sm md:text-base font-bold mb-3 text-slate-200 border-b border-slate-600 pb-2">計算結果</h3>
+                            <h3 class="text-sm md:text-base font-bold mb-3 text-slate-200 border-b border-slate-600 pb-2">リアルタイム計算結果</h3>
                             <div class="space-y-2 text-xs md:text-sm">
-                                <div class="flex justify-between"><span class="text-slate-400">総売上額</span><span id="res-sales" class="font-bold">¥0</span></div>
-                                <div class="flex justify-between"><span class="text-slate-400">仕入原価</span><span id="res-cost" class="text-red-300">- ¥0</span></div>
-                                <div class="flex justify-between"><span class="text-slate-400">手数料</span><span id="res-fee" class="text-red-300">- ¥0</span></div>
-                                <div class="flex justify-between"><span class="text-slate-400">国際送料</span><span id="res-ship" class="text-red-300">- ¥0</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">商品価格の売上</span><span id="res-sales" class="font-bold">¥0</span></div>
+                                <div class="flex justify-between border-b border-slate-700 pb-2" id="row-shipping-revenue">
+                                    <span class="text-slate-400">購入者から貰う送料 <span class="text-[9px]">(切り上げUSD)</span></span><span id="res-shipping-revenue" class="text-emerald-300">+ ¥0</span>
+                                </div>
+                                <div class="flex justify-between mt-2"><span class="text-slate-400">仕入原価</span><span id="res-cost" class="text-red-300">- ¥0</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">eBay手数料総額 <span class="text-[9px]" id="res-fee-note"></span></span><span id="res-fee" class="text-red-300">- ¥0</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">国際送料 <span class="text-[9px]">(EMS実費)</span></span><span id="res-ship" class="text-red-300">- ¥0</span></div>
+                                <div class="flex justify-between"><span class="text-slate-400">Payoneer為替手数料 <span class="text-[9px]">(約2%)</span></span><span id="res-payoneer" class="text-red-300">- ¥0</span></div>
                                 
-                                <div class="bg-slate-900 p-3 rounded-lg mt-3 text-center">
-                                    <div class="text-[10px] text-slate-400 mb-1">見込み純利益</div>
+                                <div class="bg-slate-900 p-3 rounded-lg mt-3 text-center border border-slate-700 relative overflow-hidden">
+                                    <div class="text-[10px] text-slate-400 mb-1">最終的な手残り純利益</div>
                                     <div id="res-profit" class="text-2xl md:text-4xl font-black text-emerald-400">¥0</div>
                                     <div class="text-[10px] text-slate-400 mt-1">利益率: <span id="res-margin" class="font-bold text-white">0%</span></div>
                                 </div>
                             </div>
-                            <button id="btn-save" onclick="saveToTracker()" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 md:py-4 rounded-lg text-sm font-bold transition-colors shadow-md">
+                            <button id="btn-save" onclick="saveToTracker()" class="mt-4 w-full bg-emerald-600 hover:bg-emerald-700 text-white py-2.5 md:py-3 rounded-lg text-sm font-bold transition-colors shadow-md">
                                 スプレッドシートに記録
                             </button>
                         </div>
@@ -287,133 +324,149 @@
                 </h2>
                 <p class="text-xs md:text-sm text-slate-500 mt-1">実際に売れた商品の利益を確定し、管理します。</p>
             </div>
-            <button class="bg-blue-600 hover:bg-blue-700 text-white px-3 py-1.5 md:px-4 md:py-2 rounded-lg text-xs md:text-sm font-medium flex items-center gap-1 transition-colors">
-                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
-                <span class="hidden sm:inline">最新データを取得</span>
-                <span class="sm:hidden">更新</span>
-            </button>
         </div>
         <div class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 text-center text-slate-500">
             <p>※ここは後ほど実装予定のダッシュボードエリアです。</p>
         </div>
-        <div class="h-20"></div>
     </main>
 
-    <!-- ★追加: メインコンテンツ (使い方/マニュアル画面) -->
+    <!-- メインコンテンツ (使い方/マニュアル画面) -->
     <main id="view-manual" class="flex-1 overflow-y-auto bg-slate-100 p-4 md:p-8 scroll-smooth w-full hidden">
-        
         <div class="max-w-4xl mx-auto space-y-6 md:space-y-8">
             
-            <!-- マニュアル用 目次 (インライン配置) -->
             <div class="bg-white p-5 rounded-xl shadow-sm border border-slate-200">
                 <h2 class="font-bold text-slate-800 text-base mb-3 border-b border-slate-100 pb-2 flex items-center gap-2">
                     <svg class="w-5 h-5 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h7"></path></svg>
-                    マニュアル目次
+                    eBayマニュアル ＆ 備忘録
                 </h2>
                 <nav class="space-y-2">
-                    <a href="#manual-ebay-sold" class="block text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors">・eBayで「売れた商品」を調べる</a>
-                    <a href="#" class="block text-sm text-slate-400 cursor-not-allowed">・Keepaを使った価格監視 (準備中)</a>
-                    <a href="#" class="block text-sm text-slate-400 cursor-not-allowed">・GPAツールの使い方 (準備中)</a>
+                    <a href="#manual-ebay-sold" class="block text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors">1. アメリカ以外の国で「売れた商品」を確認する方法</a>
+                    <a href="#manual-shipping" class="block text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors">2. 配送設定（送料別）と配達日数のバラつきについて</a>
+                    <a href="#manual-payoneer" class="block text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors">3. Payoneer（ペイオニア）の役割と今後の流れ</a>
+                    <a href="#manual-trouble" class="block text-sm text-blue-600 hover:text-blue-800 hover:underline transition-colors">4. 出品時のトラブルと解決策（必須の備忘録）</a>
                 </nav>
             </div>
 
-            <!-- マニュアル本文エリア -->
-            <div class="bg-white p-6 md:p-10 rounded-xl shadow-sm border border-slate-200">
-                
-                <!-- セクション: eBayで売れた商品を調べる -->
-                <section id="manual-ebay-sold">
-                    <h1 class="text-xl md:text-2xl font-bold text-slate-800 mb-4 border-b-2 border-blue-500 pb-2 flex items-center gap-2">
-                        <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"></path></svg>
-                        eBayで「実際に売れた商品（需要）」を調べる方法
-                    </h1>
-                    <p class="mb-8 text-sm md:text-base text-slate-600 leading-relaxed">
-                        eBayで利益を出すための第一歩は、「過去に何が、いくらで売れたのか」という答え合わせをすることです。<br>
-                        この手順で、確実な需要をチェックしましょう。<br>
-                        <span class="text-xs text-slate-400">（※ブラウザの翻訳機能を使っている場合は、カッコ内の日本語表記を参考にしてください）</span>
-                    </p>
-
-                    <div class="space-y-10">
-                        <!-- ステップ1 -->
-                        <div>
-                            <h3 class="text-base md:text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
-                                <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm shrink-0">1</span> 
-                                キーワードで検索する
-                            </h3>
-                            <p class="text-sm text-slate-600 mb-4 leading-relaxed">
-                                まずはeBay（ebay.com）を開き、検索窓に調べたいキャラクター名などを<strong>英語（ローマ字）</strong>で入力して検索ボタンを押します。<br>
-                                <a href="https://www.ebay.com/" target="_blank" class="text-blue-500 hover:underline mt-1 inline-block">▶ eBay公式サイトを開く</a>
-                            </p>
-                            
-                            <!-- 画像切り替えタブ (Step 1) -->
-                            <div class="mt-4">
-                                <div class="flex flex-wrap border-b border-slate-200 mb-3 gap-1 md:gap-2">
-                                    <button onclick="switchManualImage('step1', 'pc_en')" class="tab-btn-step1 px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border-b-2 border-blue-600 text-blue-600 transition-colors" data-type="pc_en">💻 PC (英語)</button>
-                                    <button onclick="switchManualImage('step1', 'pc_ja')" class="tab-btn-step1 px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors" data-type="pc_ja">💻 PC (日本語)</button>
-                                    <button onclick="switchManualImage('step1', 'sp_en')" class="tab-btn-step1 px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors" data-type="sp_en">📱 スマホ (英語)</button>
-                                    <button onclick="switchManualImage('step1', 'sp_ja')" class="tab-btn-step1 px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors" data-type="sp_ja">📱 スマホ (日本語)</button>
-                                </div>
-                                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-center min-h-[200px] flex items-center justify-center">
-                                    <img id="img-step1" src="./step1_pc_en.JPG" alt="キーワード検索" class="max-w-full h-auto rounded shadow-sm mx-auto border border-slate-200 max-h-[400px] object-contain">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- ステップ2 -->
-                        <div>
-                            <h3 class="text-base md:text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
-                                <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm shrink-0">2</span> 
-                                「売れた商品」だけに絞り込む
-                            </h3>
-                            <p class="text-sm text-slate-600 mb-4 leading-relaxed">
-                                検索結果には、現在出品中のものと過去に売れたものが混ざっています。「過去に売れたものだけ」を表示させる設定をします。<br><br>
-                                <strong>PCの場合：</strong> 画面左側のメニューを下にスクロールし、「Show only（次の商品のみ表示）」の中にある<strong>「Sold Items（販売済み商品）」</strong>にチェックを入れます。<br>
-                                <strong>スマホの場合：</strong> 検索窓の下にある<strong>「Filter（フィルター）」</strong>をタップし、<strong>「Sold Items（販売済み商品）」</strong>をオンにして青いボタンを押します。
-                            </p>
-                            
-                            <!-- 画像切り替えタブ (Step 2) -->
-                            <div class="mt-4">
-                                <div class="flex flex-wrap border-b border-slate-200 mb-3 gap-1 md:gap-2">
-                                    <button onclick="switchManualImage('step2', 'pc_en')" class="tab-btn-step2 px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border-b-2 border-blue-600 text-blue-600 transition-colors" data-type="pc_en">💻 PC (英語)</button>
-                                    <button onclick="switchManualImage('step2', 'pc_ja')" class="tab-btn-step2 px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors" data-type="pc_ja">💻 PC (日本語)</button>
-                                    <button onclick="switchManualImage('step2', 'sp_en')" class="tab-btn-step2 px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors" data-type="sp_en">📱 スマホ (英語)</button>
-                                    <button onclick="switchManualImage('step2', 'sp_ja')" class="tab-btn-step2 px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors" data-type="sp_ja">📱 スマホ (日本語)</button>
-                                </div>
-                                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-center min-h-[200px] flex items-center justify-center">
-                                    <img id="img-step2" src="./step2_pc_en.JPG" alt="絞り込み画面" class="max-w-full h-auto rounded shadow-sm mx-auto border border-slate-200 max-h-[400px] object-contain">
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- ステップ3 -->
-                        <div>
-                            <h3 class="text-base md:text-lg font-bold text-slate-800 mb-3 flex items-center gap-2">
-                                <span class="bg-blue-600 text-white w-6 h-6 rounded-full flex items-center justify-center text-sm shrink-0">3</span> 
-                                緑色の価格（売れた価格）を確認する
-                            </h3>
-                            <p class="text-sm text-slate-600 mb-4 leading-relaxed">
-                                画面が切り替わり、価格が<strong>「緑色」</strong>で表示されたら成功です！<br>
-                                緑色の金額が「実際に売れた価格」と「売れた日付」を表しています。ここでたくさん商品が出てくれば、「この商品は海外でしっかり需要がある」と判断できます。
-                            </p>
-                            
-                            <!-- 画像切り替えタブ (Step 3) -->
-                            <div class="mt-4">
-                                <div class="flex flex-wrap border-b border-slate-200 mb-3 gap-1 md:gap-2">
-                                    <button onclick="switchManualImage('step3', 'pc_en')" class="tab-btn-step3 px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border-b-2 border-blue-600 text-blue-600 transition-colors" data-type="pc_en">💻 PC (英語)</button>
-                                    <button onclick="switchManualImage('step3', 'pc_ja')" class="tab-btn-step3 px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors" data-type="pc_ja">💻 PC (日本語)</button>
-                                    <button onclick="switchManualImage('step3', 'sp_en')" class="tab-btn-step3 px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors" data-type="sp_en">📱 スマホ (英語)</button>
-                                    <button onclick="switchManualImage('step3', 'sp_ja')" class="tab-btn-step3 px-2 md:px-3 py-1.5 text-[10px] md:text-xs font-bold border-b-2 border-transparent text-slate-500 hover:text-slate-700 transition-colors" data-type="sp_ja">📱 スマホ (日本語)</button>
-                                </div>
-                                <div class="bg-slate-50 border border-slate-200 rounded-lg p-4 text-center min-h-[200px] flex items-center justify-center">
-                                    <img id="img-step3" src="./step3_pc_en.JPG" alt="結果画面" class="max-w-full h-auto rounded shadow-sm mx-auto border border-slate-200 max-h-[400px] object-contain">
-                                </div>
-                            </div>
-                        </div>
-
+            <!-- セクション1: アメリカ以外の国で売れたか調べる -->
+            <div id="manual-ebay-sold" class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 mb-4 border-b-2 border-blue-500 pb-2 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9"></path></svg>
+                    アメリカ以外の国での需要を確認する方法
+                </h1>
+                <p class="mb-6 text-sm text-slate-600 leading-relaxed">
+                    アメリカ向けのEMS関税ルールを避けるため、ヨーロッパやアジアなど「その他の地域」での需要をeBay上で確認するテクニックです。
+                </p>
+                <div class="space-y-6">
+                    <div>
+                        <h3 class="manual-h3">Step 1. 「Ship to（配送先）」を変更する</h3>
+                        <p class="text-sm text-slate-600 mb-2">eBayのトップページ右上にある「Ship to（配送先）」をクリックし、設定を「United States」からヨーロッパの国（例：United Kingdom や France）に変更します。</p>
+                        <div class="bg-slate-100 p-3 rounded text-center text-sm font-bold text-slate-500">🔍 Ship to: United Kingdom</div>
                     </div>
-                </section>
-                
+                    <div>
+                        <h3 class="manual-h3">Step 2. キーワード検索 ＆ Sold Itemsで絞り込み</h3>
+                        <p class="text-sm text-slate-600 mb-2">調べたい商品を検索し、左側のフィルターから「Sold Items（販売済み）」にチェックを入れます。</p>
+                    </div>
+                    <div>
+                        <h3 class="manual-h3">Step 3. 結果の確認</h3>
+                        <p class="text-sm text-slate-600">
+                            表示された「緑色の価格（売れた商品）」は、<strong>あなたが設定した配送先（イギリス等）へ発送可能だった商品の中で、実際に売れたもの</strong>です。<br>
+                            eBayは世界中で見られているため、ここでたくさん売れていればアメリカ以外でも十分に需要がある証拠になります。
+                        </p>
+                    </div>
+                </div>
             </div>
-            <!-- 下部余白（スマホ用） -->
+
+            <!-- セクション2: 配送日数のバラつき -->
+            <div id="manual-shipping" class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 mb-4 border-b-2 border-emerald-500 pb-2 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3.055 11H5a2 2 0 012 2v1a2 2 0 002 2 2 2 0 012 2v2.945M8 3.935V5.5A2.5 2.5 0 0010.5 8h.5a2 2 0 012 2 2 2 0 104 0 2 2 0 012-2h1.064M15 20.488V18a2 2 0 012-2h3.064M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                    配送設定（送料別）と配達日数のバラつきについて
+                </h1>
+                <p class="mb-4 text-sm text-slate-600 leading-relaxed">
+                    「アジアでも17日かかる所もあれば、ブラジルは遠いのに12日で着くなど、地域によって日数がバラバラ」という問題への対応方法です。
+                </p>
+                <div class="tip-box mb-4">
+                    <strong>【結論】バイヤーに約束する日数は「長め（遅め）」に設定しておくのが鉄則です！</strong><br>
+                    早く着く分には「予定より早く届いて嬉しい！」と喜ばれますが、1日でも遅れるとクレームになりやすいのが海外取引の特徴です。
+                </div>
+                <h3 class="manual-h3">Shipping policy（配送設定）のコツ</h3>
+                <p class="text-sm text-slate-600 mb-6">
+                    eBayの配送設定でサービスを選ぶ際、EMSを利用するからといって必ずしも「Expedited (速達: 1〜4営業日)」を選ぶ必要はありません。<br>
+                    地域によって日数が読めない場合は、<strong>「Standard International Shipping (標準配送: 11〜23営業日など)」</strong>といった、期間に余裕のある選択肢を選んでおき、その枠の中で設定した送料を入力するのが安全で賢い設定方法です。
+                </p>
+            </div>
+
+            <!-- セクション3: Payoneerの解説 -->
+            <div id="manual-payoneer" class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 mb-4 border-b-2 border-purple-500 pb-2 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-purple-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"></path></svg>
+                    Payoneer（ペイオニア）の役割と今後の流れ
+                </h1>
+                <p class="mb-4 text-sm text-slate-600 leading-relaxed">
+                    出品完了時に表示された赤いエラーバナーと、Payoneerへの登録に関する解説です。これはeBay販売における正常なプロセスのため、ご安心ください。
+                </p>
+                
+                <h3 class="manual-h3">Payoneerとは？</h3>
+                <p class="text-sm text-slate-600 mb-6">
+                    eBayの売上金を日本円で受け取るための<strong>公式の「中継用・海外銀行口座」</strong>のようなものです。バイヤーが払ったドルがPayoneerに入り、そこから日本の自分の銀行口座へ日本円で出金します。<br>
+                    ※出金時に、為替手数料として約2%がPayoneer側で差し引かれます。（このアプリの利益計算には自動で組み込まれています）
+                </p>
+
+                <h3 class="manual-h3">なぜ出品が完了しなかったのか？</h3>
+                <div class="alert-box mb-4">
+                    <strong>【eBayの赤いバナーの意味】</strong><br>
+                    "Payoneer will contact you to verify your status. This process might take a few days... come back to eBay to finish listing."
+                </div>
+                <p class="text-sm text-slate-600 mb-6">
+                    初めてeBayで出品する際、eBayとPayoneerの「口座の紐付け審査」が行われます。この審査（数日〜1週間）が終わるまでは、商品を出品（公開）できない安全仕様になっています。
+                </p>
+
+                <h3 class="manual-h3">今後の対応手順</h3>
+                <ol class="list-decimal pl-5 space-y-2 text-sm text-slate-600">
+                    <li>Payoneerから「アカウントが承認されました」というメールが届くのを待ちます。</li>
+                    <li>承認後、eBayの <strong>My eBay > Drafts（下書き）</strong> を開きます。</li>
+                    <li>今回作った出品データが保存されているので、それを開いて一番下の「List it」を押せば出品公開完了です！</li>
+                </ol>
+            </div>
+
+            <!-- セクション4: トラブルシューティング（備忘録） -->
+            <div id="manual-trouble" class="bg-white p-6 md:p-8 rounded-xl shadow-sm border border-slate-200">
+                <h1 class="text-xl md:text-2xl font-bold text-slate-800 mb-4 border-b-2 border-red-500 pb-2 flex items-center gap-2">
+                    <svg class="w-6 h-6 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
+                    出品時のトラブルと解決策（必須の備忘録）
+                </h1>
+                <p class="mb-6 text-sm text-slate-600 leading-relaxed">
+                    今回の出品作業で発生したエラーや、eBay特有の罠についてのまとめです。次回出品時も必ず確認してください。
+                </p>
+
+                <div class="space-y-6">
+                    <div class="p-4 border border-slate-200 rounded-lg">
+                        <h4 class="font-bold text-red-600 mb-2">罠①：ブラウザの自動翻訳機能</h4>
+                        <p class="text-sm text-slate-600">
+                            <strong>症状：</strong> 「Sell one like this」ボタンが消滅する。Item specificsに「あなた自身の」という不自然な日本語が入る。<br>
+                            <strong>対策：</strong> 出品作業中、特に「List it（出品）」ボタンを押す前は、<strong>必ずブラウザの翻訳機能をOFF（英語の原文）</strong>に戻してください。オンのままだとシステムエラーや文字化けの原因になります。
+                        </p>
+                    </div>
+
+                    <div class="p-4 border border-slate-200 rounded-lg">
+                        <h4 class="font-bold text-orange-600 mb-2">罠②：「計算結果 (Calculated)」送料の罠</h4>
+                        <p class="text-sm text-slate-600">
+                            <strong>症状：</strong> 配送サービスを追加しようとしても、USPSなどのアメリカの配送業者しか出てこない。<br>
+                            <strong>対策：</strong> 日本から発送する場合、eBayの自動計算機能は使えません。必ずコストタイプを<strong>「定額料金 (Flat: same cost to all buyers)」</strong>に変更してから、アジアやヨーロッパ向けの料金を自分で手入力してください。
+                        </p>
+                    </div>
+
+                    <div class="p-4 border border-slate-200 rounded-lg">
+                        <h4 class="font-bold text-amber-600 mb-2">罠③：米国宛EMSの関税ルール (DDP)</h4>
+                        <p class="text-sm text-slate-600">
+                            <strong>症状：</strong> EMSでアメリカに送ると、受取拒否やトラブルになるリスクがある。<br>
+                            <strong>対策：</strong> 100ドルを超える物品は出品者が事前に「Zonosアプリ」で関税を払う必要があります。<br>
+                            ※当面はアメリカ宛を除外し、ヨーロッパ等で設定した固定送料で販売するのが最も安全です。
+                        </p>
+                    </div>
+                </div>
+            </div>
+
             <div class="h-24 md:h-12"></div>
         </div>
     </main>
@@ -441,7 +494,6 @@
             if (currentItem) calculate(); 
         });
 
-        // 検索履歴管理
         function loadSearchHistory() {
             try {
                 const historyStr = localStorage.getItem('keywordHistory');
@@ -578,13 +630,50 @@
             }, 2500);
         }
 
+        // --- EMS料金表 (全地帯対応) ---
+        // z1:中国/韓国/台湾, z2:アジア(中韓台除く), z3:欧州/豪州/中東等, z5:中南米/アフリカ
+        function getEmsRate(zone, weight) {
+            const tiers = [
+                {w: 500, z1: 1450, z2: 1900, z3: 3150, z5: 3600},
+                {w: 600, z1: 1600, z2: 2150, z3: 3400, z5: 3900},
+                {w: 700, z1: 1750, z2: 2400, z3: 3650, z5: 4200},
+                {w: 800, z1: 1900, z2: 2650, z3: 3900, z5: 4500},
+                {w: 900, z1: 2050, z2: 2900, z3: 4150, z5: 4800},
+                {w: 1000, z1: 2200, z2: 3150, z3: 4400, z5: 5100},
+                {w: 1250, z1: 2500, z2: 3500, z3: 5000, z5: 5850},
+                {w: 1500, z1: 2800, z2: 3850, z3: 5550, z5: 6600},
+                {w: 1750, z1: 3100, z2: 4200, z3: 6150, z5: 7350},
+                {w: 2000, z1: 3400, z2: 4550, z3: 6700, z5: 8100},
+                {w: 2500, z1: 3900, z2: 5150, z3: 7750, z5: 9600},
+                {w: 3000, z1: 4400, z2: 5750, z3: 8800, z5: 11100}
+            ];
+            // 該当重量の層を探す（3kgを超える場合は一旦最大の料金とする）
+            let tier = tiers.find(t => weight <= t.w) || tiers[tiers.length - 1];
+            return tier[zone];
+        }
+
+        // リスト表示用の簡易計算
         function calculateItemProfit(item) {
             const rate = parseFloat(document.getElementById('global-rate').value) || 150;
             const salesJpy = Math.floor(item.priceUsd * rate);
-            const feeJpy = Math.floor(salesJpy * 0.17); 
-            let shippingJpy = (item.weight <= 300) ? 1350 : (item.weight <= 500) ? 1650 : 2800; 
-            const totalCost = (item.estCost || 0) + feeJpy + shippingJpy + 100; 
-            const profit = salesJpy - totalCost;
+            
+            // 簡易計算は「欧州向け(z3)・実費をドル換算し切り上げ」をベースにする
+            let emsCostJpy = getEmsRate('z3', item.weight || 500);
+            if (salesJpy >= 20000) emsCostJpy += 50;
+            
+            const shippingUsd = Math.ceil(emsCostJpy / rate); // バイヤー請求送料(USD)
+            const totalSalesUsd = item.priceUsd + shippingUsd;
+            
+            // eBay手数料: (商品価格+送料) * (13.6% + 海外決済1.35%) + $0.40
+            const ebayFeeUsd = (totalSalesUsd * 0.1495) + 0.40;
+            
+            // Payoneer入金(USD) -> Payoneer出金(JPY) ※為替手数料2%引き
+            const payoneerUsd = totalSalesUsd - ebayFeeUsd;
+            const receivedJpy = Math.floor(payoneerUsd * rate * 0.98);
+            
+            // 利益 = 受け取った日本円 - 仕入れ原価 - 郵便局に払うEMS代
+            const totalCost = (item.estCost || 0) + emsCostJpy; 
+            const profit = receivedJpy - totalCost; 
             return { profit, margin: salesJpy > 0 ? (profit / salesJpy) * 100 : 0 };
         }
 
@@ -632,15 +721,14 @@
             currentItem = item;
             document.getElementById('empty-state').classList.add('hidden'); document.getElementById('calculator-panel').classList.remove('hidden');
             
-            const imgEl = document.getElementById('selected-image'), noImgEl = document.getElementById('selected-no-image'), lensLinkEl = document.getElementById('lens-link');
+            const imgEl = document.getElementById('selected-image'), noImgEl = document.getElementById('selected-no-image');
             if (item.thumb) {
                 let highResUrl = item.thumb;
                 if(highResUrl.includes('s-l225')) highResUrl = highResUrl.replace('s-l225', 's-l1000');
                 else if(highResUrl.includes('s-l500')) highResUrl = highResUrl.replace('s-l500', 's-l1000');
                 imgEl.src = highResUrl; imgEl.classList.remove('hidden'); noImgEl.classList.add('hidden');
-                lensLinkEl.href = `https://lens.google.com/uploadbyurl?url=${encodeURIComponent(highResUrl)}`; lensLinkEl.classList.remove('hidden');
             } else {
-                imgEl.src = ""; imgEl.classList.add('hidden'); noImgEl.classList.remove('hidden'); lensLinkEl.classList.add('hidden');
+                imgEl.src = ""; imgEl.classList.add('hidden'); noImgEl.classList.remove('hidden');
             }
 
             document.getElementById('selected-title').textContent = item.title;
@@ -664,19 +752,84 @@
         }
 
         function calculate() {
-            const rate = parseFloat(document.getElementById('global-rate').value) || 150, priceUsd = parseFloat(document.getElementById('calc-price-usd').value) || 0, costJpy = parseFloat(document.getElementById('calc-cost-jpy').value) || 0, weight = parseFloat(document.getElementById('calc-weight').value) || 500;
-            const shippingType = document.getElementById('calc-shipping').value, feePercent = parseFloat(document.getElementById('calc-fee-percent').value) || 17;
+            // 基本値の取得
+            const rate = parseFloat(document.getElementById('global-rate').value) || 150;
+            const priceUsd = parseFloat(document.getElementById('calc-price-usd').value) || 0;
+            const costJpy = parseFloat(document.getElementById('calc-cost-jpy').value) || 0;
+            const weight = parseFloat(document.getElementById('calc-weight').value) || 500;
+            const categoryPercent = parseFloat(document.getElementById('calc-category').value) || 13.6;
+
             if (!alertedHighPrice && (priceUsd >= 500 || costJpy >= 50000)) { showModal(); alertedHighPrice = true; }
 
-            const salesJpy = Math.floor(priceUsd * rate), feeJpy = Math.floor(salesJpy * (feePercent / 100));
-            let shippingJpy = (shippingType === 'epacket') ? 900 + Math.floor(weight / 100) * 150 : (shippingType === 'ems') ? 2000 + Math.floor(weight / 100) * 200 : 2300 + Math.floor(weight / 100) * 100;
-            const breakEven = salesJpy - feeJpy - shippingJpy, profit = breakEven - costJpy;
+            // 地域設定の取得
+            const payer = document.getElementById('calc-shipping-payer').value; // buyer or seller
+            const region = document.getElementById('calc-region').value; // z1, z2, z3, z5
+            const isBuyerPays = (payer === 'buyer');
 
+            // 1. EMS送料(円)の実費を計算 (重量と地域から動的取得)
+            let emsCostJpy = getEmsRate(region, weight);
+            
+            // 保険料の計算 (商品売上が2万円以上なら+50円)
+            if ((priceUsd * rate) >= 20000) emsCostJpy += 50;
+
+            // 2. 送料別(購入者負担)の場合、バイヤーに請求する送料(USD)
+            // 実費を現在のレートで割り、「小数を切り上げた整数ドル」にする
+            let shippingUsd = 0;
+            if (isBuyerPays) {
+                shippingUsd = Math.ceil(emsCostJpy / rate);
+            }
+
+            // 3. 売上総額 (USD)
+            const totalSalesUsd = priceUsd + shippingUsd;
+            
+            // 4. eBay手数料(USD)の計算
+            // 落札手数料(カテゴリ%) + 海外決済手数料(1.35%)
+            const ebayFeePercent = categoryPercent + 1.35;
+            // 固定手数料 ($0.40 / 10ドル以下なら$0.30)
+            const ebayFixedFeeUsd = totalSalesUsd > 10 ? 0.40 : (totalSalesUsd > 0 ? 0.30 : 0);
+            
+            const ebayFeeUsd = (totalSalesUsd * (ebayFeePercent / 100)) + ebayFixedFeeUsd;
+
+            // 5. Payoneer入金額(USD)
+            const payoneerUsd = totalSalesUsd - ebayFeeUsd;
+
+            // 6. Payoneerから日本の銀行への出金(JPY) ※為替手数料約2%引き
+            const receivedJpy = Math.floor(payoneerUsd * rate * 0.98);
+            const payoneerFeeJpy = Math.floor(payoneerUsd * rate * 0.02);
+
+            // 7. 利益の計算 (受け取った日本円から、原価と郵便局へのEMS代を引く)
+            const profit = receivedJpy - costJpy - emsCostJpy;
+            const breakEven = receivedJpy - emsCostJpy; 
+
+            // --- UIの更新 ---
             const format = (num) => "¥" + num.toLocaleString('ja-JP');
-            document.getElementById('res-sales').textContent = format(salesJpy); document.getElementById('res-cost').textContent = "- " + format(costJpy);
-            document.getElementById('res-fee').textContent = "- " + format(feeJpy); document.getElementById('res-ship').textContent = "- " + format(shippingJpy);
+            const salesJpy = Math.floor(priceUsd * rate);
+            
+            document.getElementById('display-ems-jpy').textContent = format(emsCostJpy);
+            document.getElementById('display-shipping-usd').textContent = `$${shippingUsd}`;
+
+            document.getElementById('res-sales').textContent = format(salesJpy);
+            document.getElementById('res-cost').textContent = "- " + format(costJpy);
+            
+            // 手数料内訳の表示
+            document.getElementById('res-fee').textContent = "- " + format(Math.floor(ebayFeeUsd * rate));
+            document.getElementById('res-fee-note').textContent = `(約${ebayFeePercent.toFixed(2)}% + $0.40)`;
+            document.getElementById('res-payoneer').textContent = "- " + format(payoneerFeeJpy);
+            document.getElementById('res-ship').textContent = "- " + format(emsCostJpy);
+            
+            const revRow = document.getElementById('row-shipping-revenue');
+            const revVal = document.getElementById('res-shipping-revenue');
+            if (isBuyerPays) {
+                revRow.style.display = 'flex';
+                revVal.textContent = "+ " + format(Math.floor(shippingUsd * rate));
+            } else {
+                revRow.style.display = 'none';
+            }
+
             document.getElementById('break-even-point').textContent = breakEven > 0 ? "¥" + breakEven.toLocaleString('ja-JP') + " 以下" : "利益不可";
-            const profitEl = document.getElementById('res-profit'); profitEl.textContent = format(profit);
+            
+            const profitEl = document.getElementById('res-profit'); 
+            profitEl.textContent = format(profit);
             profitEl.className = `text-2xl md:text-4xl font-black ${profit < 0 ? 'text-red-500' : 'text-emerald-400'}`;
             document.getElementById('res-margin').textContent = (salesJpy > 0 ? (profit / salesJpy) * 100 : 0).toFixed(1) + "%";
         }
@@ -718,22 +871,6 @@
         }
         function showModal() { document.getElementById('high-price-modal').classList.remove('hidden'); }
         function closeModal() { document.getElementById('high-price-modal').classList.add('hidden'); }
-
-        function switchManualImage(stepId, type) {
-            const btns = document.querySelectorAll(`.tab-btn-${stepId}`);
-            btns.forEach(btn => {
-                if(btn.dataset.type === type) {
-                    btn.classList.add('border-blue-600', 'text-blue-600');
-                    btn.classList.remove('border-transparent', 'text-slate-500');
-                } else {
-                    btn.classList.remove('border-blue-600', 'text-blue-600');
-                    btn.classList.add('border-transparent', 'text-slate-500');
-                }
-            });
-
-            const imgEl = document.getElementById(`img-${stepId}`);
-            imgEl.src = `./${stepId}_${type}.JPG`; 
-        }
 
     </script>
 </body>
